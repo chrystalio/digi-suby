@@ -10,10 +10,11 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { index as categories } from '@/routes/categories';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { Folder, Github, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,13 +23,18 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Categories',
+        href: categories(),
+        icon: Folder,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
         href: 'https://github.com/chrystalio/digi-suby',
-        icon: Folder,
+        icon: Github,
     },
 ];
 
