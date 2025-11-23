@@ -168,7 +168,3 @@ tests/
 3. Write tests for new features
 4. Ensure all tests pass
 5. Submit a pull request
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](LICENSE).
