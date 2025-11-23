@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { IconPicker, Icon, type IconName } from '@/components/ui/icon-picker';
 import { store, update } from '@/actions/App/Http/Controllers/CategoryController';
 import { Category } from '@/types';
@@ -27,6 +28,7 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
 
     const { data, setData, post, put, processing, errors, reset } = useForm({
         name: category?.name ?? '',
+        description: category?.description ?? '',
         color: category?.color ?? '#3b82f6',
         icon: category?.icon ?? '',
     });
@@ -35,6 +37,7 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
         if (open) {
             setData({
                 name: category?.name ?? '',
+                description: category?.description ?? '',
                 color: category?.color ?? '#3b82f6',
                 icon: category?.icon ?? '',
             });
@@ -87,6 +90,24 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                             />
                             {errors.name && (
                                 <p className="text-destructive text-sm">{errors.name}</p>
+                            )}
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                value={data.description}
+                                onChange={(e) => setData('description', e.target.value)}
+                                placeholder="Short description (max 100 characters)"
+                                maxLength={100}
+                                rows={2}
+                            />
+                            <p className="text-muted-foreground text-xs">
+                                {data.description.length}/100 characters
+                            </p>
+                            {errors.description && (
+                                <p className="text-destructive text-sm">{errors.description}</p>
                             )}
                         </div>
 

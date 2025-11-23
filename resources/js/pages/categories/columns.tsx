@@ -43,8 +43,8 @@ export function getColumns({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Cat
                         </div>
                         <div className="flex flex-col">
                             <span className="font-medium">{category.name}</span>
-                            {category.icon && (
-                                <span className="text-muted-foreground text-xs">{category.icon}</span>
+                            {category.description && (
+                                <span className="text-muted-foreground text-xs">{category.description}</span>
                             )}
                         </div>
                     </div>
@@ -74,6 +74,10 @@ export function getColumns({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Cat
             id: 'actions',
             cell: ({ row }) => {
                 const category = row.original;
+
+                if (category.is_system) {
+                    return null;
+                }
 
                 return (
                     <DropdownMenu>

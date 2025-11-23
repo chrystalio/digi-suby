@@ -1,10 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Category, PaginatedData } from '@/types';
+import { BreadcrumbItem, Category, PaginatedData, SharedData } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { dashboard } from '@/routes';
 import { index as categoriesIndex } from '@/routes/categories';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -35,12 +35,22 @@ interface CategoriesIndexProps {
 }
 
 export default function Index({ categories }: CategoriesIndexProps) {
+    const { flash } = usePage<SharedData>().props;
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
+
+    useEffect(() => {
+        if (flash.success) {
+            toast.success(flash.success);
+        }
+        if (flash.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
 
     const handleCreate = () => {
         setEditingCategory(null);
@@ -60,13 +70,11 @@ export default function Index({ categories }: CategoriesIndexProps) {
 
     const confirmDelete = () => {
         if (deletingCategory && deleteConfirmText === deletingCategory.name) {
-            const categoryName = deletingCategory.name;
             router.delete(destroy.url(deletingCategory.id), {
                 onSuccess: () => {
                     setIsDeleteDialogOpen(false);
                     setDeletingCategory(null);
                     setDeleteConfirmText('');
-                    toast.success(`Category "${categoryName}" deleted successfully`);
                 },
             });
         }

@@ -13,10 +13,17 @@ export interface BreadcrumbItem {
 export interface Category {
     id: string;
     name: string;
+    description: string | null;
     color: string | null;
     icon: string | null;
+    is_system: boolean;
     created_at: string;
     updated_at: string;
+}
+
+export interface Flash {
+    success: string | null;
+    error: string | null;
 }
 
 export interface PaginatedData<T> {
@@ -46,6 +53,7 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    flash: Flash;
     [key: string]: unknown;
 }
 
