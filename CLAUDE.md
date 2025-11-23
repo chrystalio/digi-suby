@@ -107,8 +107,9 @@ npm run build:ssr       # Build with SSR support
 
 **TypeScript Types:**
 - Global types in `resources/js/types/index.d.ts`
-- Key interfaces: User, Auth, SharedData, NavItem, NavGroup, BreadcrumbItem
+- Key interfaces: User, Auth, SharedData, NavItem, NavGroup, BreadcrumbItem, Category, PaginatedData
 - Inertia shared data typed via SharedData interface
+- `PaginatedData<T>` generic interface for Laravel paginated responses
 
 **Utilities:**
 - `lib/utils.ts` - `cn()` for Tailwind class merging, `isSameUrl()` for route matching
@@ -162,6 +163,52 @@ npm run build:ssr       # Build with SSR support
 - Prettier with organize-imports and tailwindcss plugins
 - ESLint with React 19 and TypeScript support
 - Database uses SQLite by default (check `.env` for configuration)
+
+## Implemented Features
+
+### Categories Management
+- CRUD operations for user categories at `/categories`
+- CategoryController with server-side pagination
+- Category model with ULID primary key
+- Form validation via StoreCategoryRequest
+
+### Reusable DataTable Component
+Located at `resources/js/components/ui/data-table.tsx`
+
+**Features:**
+- Server-side pagination support with `manualPagination`
+- Client-side pagination fallback
+- Column sorting and filtering
+- Expandable rows
+
+**Usage with Server-Side Pagination:**
+```tsx
+<DataTable
+    data={categories.data}
+    columns={columns}
+    pageCount={categories.last_page}
+    currentPage={categories.current_page}
+    pageSize={categories.per_page}
+    onPageChange={handlePageChange}
+    onPageSizeChange={handlePageSizeChange}
+/>
+```
+
+**Props:**
+- `pageCount` - Total number of pages (enables server-side mode)
+- `currentPage` - Current page number (1-indexed)
+- `pageSize` - Items per page
+- `onPageChange` - Callback when page changes
+- `onPageSizeChange` - Callback when page size changes
+
+### Supporting UI Components
+- `data-table-pagination.tsx` - Pagination controls
+- `data-table-column-header.tsx` - Sortable column headers
+- `icon-picker.tsx` - Lucide icon selector
+- `alert-dialog.tsx` - Confirmation dialogs
+- `sonner.tsx` - Toast notifications
+- `table.tsx` - Base table component
+- `popover.tsx` - Popover component
 
 ===
 
