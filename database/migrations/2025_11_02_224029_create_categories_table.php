@@ -15,6 +15,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->string('name');
             $table->string('slug');
+            $table->string('description')->nullable();
             $table->string('icon')->nullable();
             $table->string('color')->nullable();
             $table->boolean('is_system')->default(false);
