@@ -25,14 +25,16 @@ A modern subscription management application built with Laravel 12 and React 19.
 #### Categories & Organization
 - [x] Categories management (CRUD)
 - [x] Custom category creation with icons and colors
-- [ ] System categories (predefined)
+- [x] System categories (predefined)
 - [ ] Category-based filtering and reports
 
-#### Payment Accounts
-- [ ] Payment account management
-- [ ] Multiple payment methods per account
-- [ ] Account balance tracking
-- [ ] Payment method icons and branding
+#### Payment Methods
+- [ ] Payment method management (cards & e-wallets)
+- [ ] Card type auto-detection (Visa, Mastercard, Amex, etc.)
+- [ ] E-wallet support (DANA, OVO, GoPay, Apple Pay, Google Pay, etc.)
+- [ ] Secure storage (only last 4 digits stored)
+- [ ] Payment method logos via logo.dev
+- [ ] Expiry warnings for cards
 
 #### Services & Subscriptions
 - [ ] Service library with popular subscriptions
@@ -59,17 +61,16 @@ A modern subscription management application built with Laravel 12 and React 19.
 - [x] Authentication system with 2FA
 - [x] User settings (profile, password, appearance)
 - [x] Categories CRUD with server-side pagination
+- [x] Category policies and authorization
+- [x] System categories support
 - [x] Reusable DataTable component
 - [x] Icon picker component
 - [x] Toast notifications
 
 ### In Progress
-- [ ] Category policies and authorization
-- [ ] System categories support
-- [ ] Color picker component
+- [ ] Payment methods management (cards & e-wallets)
 
 ### Next Up
-- [ ] Payment accounts management
 - [ ] Services/subscriptions CRUD
 - [ ] Dashboard with analytics
 
