@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\PaymentMethod;
 use App\Policies\CategoryPolicy;
+use App\Policies\PaymentMethodPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,5 +25,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Category::class, CategoryPolicy::class);
+        Gate::policy(PaymentMethod::class, PaymentMethodPolicy::class);
     }
 }
