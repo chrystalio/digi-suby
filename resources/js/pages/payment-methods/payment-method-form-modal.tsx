@@ -36,7 +36,7 @@ import {
     PaymentMethodType,
 } from '@/types';
 import { useForm } from '@inertiajs/react';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface PaymentMethodFormModalProps {
@@ -335,6 +335,12 @@ export function PaymentMethodFormModal({
                                             </div>
                                         )}
                                     </div>
+                                    {!isEditing && (
+                                        <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0 text-green-500" />
+                                            Full number used to detect card type. Only the last 4 digits are saved.
+                                        </p>
+                                    )}
                                     {isEditing && (
                                         <p className="text-xs text-muted-foreground">
                                             {data.card_category && (
