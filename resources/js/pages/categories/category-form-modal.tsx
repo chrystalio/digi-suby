@@ -1,3 +1,7 @@
+import {
+    store,
+    update,
+} from '@/actions/App/Http/Controllers/CategoryController';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -7,11 +11,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Icon, IconPicker, type IconName } from '@/components/ui/icon-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { IconPicker, Icon, type IconName } from '@/components/ui/icon-picker';
-import { store, update } from '@/actions/App/Http/Controllers/CategoryController';
 import { Category } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
@@ -23,7 +26,11 @@ interface CategoryFormModalProps {
     category?: Category | null;
 }
 
-export function CategoryFormModal({ open, onOpenChange, category }: CategoryFormModalProps) {
+export function CategoryFormModal({
+    open,
+    onOpenChange,
+    category,
+}: CategoryFormModalProps) {
     const isEditing = !!category;
 
     const { data, setData, post, put, processing, errors, reset } = useForm({
@@ -70,7 +77,9 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{isEditing ? 'Edit Category' : 'Add Category'}</DialogTitle>
+                    <DialogTitle>
+                        {isEditing ? 'Edit Category' : 'Add Category'}
+                    </DialogTitle>
                     <DialogDescription>
                         {isEditing
                             ? 'Update the category details below.'
@@ -85,11 +94,15 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                             <Input
                                 id="name"
                                 value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
                                 placeholder="Enter category name"
                             />
                             {errors.name && (
-                                <p className="text-destructive text-sm">{errors.name}</p>
+                                <p className="text-sm text-destructive">
+                                    {errors.name}
+                                </p>
                             )}
                         </div>
 
@@ -98,16 +111,20 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                             <Textarea
                                 id="description"
                                 value={data.description}
-                                onChange={(e) => setData('description', e.target.value)}
+                                onChange={(e) =>
+                                    setData('description', e.target.value)
+                                }
                                 placeholder="Short description (max 100 characters)"
                                 maxLength={100}
                                 rows={2}
                             />
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-xs text-muted-foreground">
                                 {data.description.length}/100 characters
                             </p>
                             {errors.description && (
-                                <p className="text-destructive text-sm">{errors.description}</p>
+                                <p className="text-sm text-destructive">
+                                    {errors.description}
+                                </p>
                             )}
                         </div>
 
@@ -116,19 +133,35 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                             <div className="flex flex-col gap-3">
                                 <div className="flex flex-wrap gap-2">
                                     {[
-                                        '#ef4444', '#f97316', '#f59e0b', '#eab308',
-                                        '#84cc16', '#22c55e', '#10b981', '#14b8a6',
-                                        '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
-                                        '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
+                                        '#ef4444',
+                                        '#f97316',
+                                        '#f59e0b',
+                                        '#eab308',
+                                        '#84cc16',
+                                        '#22c55e',
+                                        '#10b981',
+                                        '#14b8a6',
+                                        '#06b6d4',
+                                        '#0ea5e9',
+                                        '#3b82f6',
+                                        '#6366f1',
+                                        '#8b5cf6',
+                                        '#a855f7',
+                                        '#d946ef',
+                                        '#ec4899',
                                     ].map((color) => (
                                         <button
                                             key={color}
                                             type="button"
                                             className={`h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 ${
-                                                data.color === color ? 'border-foreground ring-2 ring-offset-2' : 'border-transparent'
+                                                data.color === color
+                                                    ? 'border-foreground ring-2 ring-offset-2'
+                                                    : 'border-transparent'
                                             }`}
                                             style={{ backgroundColor: color }}
-                                            onClick={() => setData('color', color)}
+                                            onClick={() =>
+                                                setData('color', color)
+                                            }
                                         />
                                     ))}
                                 </div>
@@ -138,17 +171,23 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                                             id="color"
                                             type="color"
                                             value={data.color}
-                                            onChange={(e) => setData('color', e.target.value)}
+                                            onChange={(e) =>
+                                                setData('color', e.target.value)
+                                            }
                                             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                                         />
                                         <div
                                             className="flex h-9 w-9 items-center justify-center rounded-md border"
-                                            style={{ backgroundColor: data.color }}
+                                            style={{
+                                                backgroundColor: data.color,
+                                            }}
                                         />
                                     </div>
                                     <Input
                                         value={data.color}
-                                        onChange={(e) => setData('color', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('color', e.target.value)
+                                        }
                                         placeholder="#000000"
                                         className="flex-1 font-mono text-sm"
                                         maxLength={7}
@@ -156,7 +195,9 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                                 </div>
                             </div>
                             {errors.color && (
-                                <p className="text-destructive text-sm">{errors.color}</p>
+                                <p className="text-sm text-destructive">
+                                    {errors.color}
+                                </p>
                             )}
                         </div>
 
@@ -164,14 +205,22 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                             <Label>Icon</Label>
                             <IconPicker
                                 value={data.icon as IconName | undefined}
-                                onValueChange={(value) => setData('icon', value)}
+                                onValueChange={(value) =>
+                                    setData('icon', value)
+                                }
                                 triggerPlaceholder="Select an icon"
                                 modal={true}
                             >
-                                <Button variant="outline" className="w-full justify-start">
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start"
+                                >
                                     {data.icon ? (
                                         <>
-                                            <Icon name={data.icon as IconName} className="mr-2 h-4 w-4" />
+                                            <Icon
+                                                name={data.icon as IconName}
+                                                className="mr-2 h-4 w-4"
+                                            />
                                             {data.icon}
                                         </>
                                     ) : (
@@ -180,7 +229,9 @@ export function CategoryFormModal({ open, onOpenChange, category }: CategoryForm
                                 </Button>
                             </IconPicker>
                             {errors.icon && (
-                                <p className="text-destructive text-sm">{errors.icon}</p>
+                                <p className="text-sm text-destructive">
+                                    {errors.icon}
+                                </p>
                             )}
                         </div>
                     </div>

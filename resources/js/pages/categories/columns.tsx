@@ -1,5 +1,3 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -7,15 +5,20 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2, Folder } from 'lucide-react';
 import { Icon, type IconName } from '@/components/ui/icon-picker';
+import { Category } from '@/types';
+import { ColumnDef } from '@tanstack/react-table';
+import { Folder, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 
 interface GetColumnsProps {
     onEdit: (category: Category) => void;
     onDelete: (category: Category) => void;
 }
 
-export function getColumns({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Category>[] {
+export function getColumns({
+    onEdit,
+    onDelete,
+}: GetColumnsProps): ColumnDef<Category>[] {
     return [
         {
             accessorKey: 'name',
@@ -26,25 +29,35 @@ export function getColumns({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Cat
                     <div className="flex items-center gap-3">
                         <div
                             className="flex h-9 w-9 items-center justify-center rounded-lg"
-                            style={{ backgroundColor: category.color ? `${category.color}20` : undefined }}
+                            style={{
+                                backgroundColor: category.color
+                                    ? `${category.color}20`
+                                    : undefined,
+                            }}
                         >
                             {category.icon ? (
                                 <Icon
                                     name={category.icon as IconName}
                                     className="h-4 w-4"
-                                    style={{ color: category.color || undefined }}
+                                    style={{
+                                        color: category.color || undefined,
+                                    }}
                                 />
                             ) : (
                                 <Folder
                                     className="h-4 w-4"
-                                    style={{ color: category.color || undefined }}
+                                    style={{
+                                        color: category.color || undefined,
+                                    }}
                                 />
                             )}
                         </div>
                         <div className="flex flex-col">
                             <span className="font-medium">{category.name}</span>
                             {category.description && (
-                                <span className="text-muted-foreground text-xs">{category.description}</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {category.description}
+                                </span>
                             )}
                         </div>
                     </div>
@@ -65,7 +78,9 @@ export function getColumns({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Cat
                             className="inline-block h-4 w-4 rounded-full border"
                             style={{ backgroundColor: category.color }}
                         />
-                        <span className="text-muted-foreground text-sm">{category.color}</span>
+                        <span className="text-sm text-muted-foreground">
+                            {category.color}
+                        </span>
                     </div>
                 );
             },
