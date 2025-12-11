@@ -251,8 +251,13 @@ class PaymentMethodControllerTest extends TestCase
                 'card_expiry_year' => (int) date('Y') + 2,
             ]);
 
-        // Authorization is handled in the FormRequest, which returns 403
+        // FormRequest authorization check returns 403 before controller is reached
         $response->assertForbidden();
+
+        $this->assertDatabaseMissing('payment_methods', [
+            'id' => $paymentMethod->id,
+            'name' => 'Hacked Name',
+        ]);
     }
 
     public function test_users_can_delete_their_own_payment_method()
