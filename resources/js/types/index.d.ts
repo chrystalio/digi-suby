@@ -26,6 +26,47 @@ export interface Flash {
     error: string | null;
 }
 
+export type PaymentMethodType = 'card' | 'e_wallet';
+export type CardType = 'credit' | 'debit';
+export type CardCategory =
+    | 'visa'
+    | 'mastercard'
+    | 'amex'
+    | 'jcb'
+    | 'discover'
+    | 'other';
+export type EWalletProvider =
+    | 'dana'
+    | 'ovo'
+    | 'gopay'
+    | 'apple_pay'
+    | 'google_pay'
+    | 'shopee_pay'
+    | 'linkaja';
+
+export interface PaymentMethod {
+    id: string;
+    user_id: number;
+    name: string;
+    method_type: PaymentMethodType;
+    card_type: CardType | null;
+    card_category: CardCategory | null;
+    card_last_four: string | null;
+    card_expiry_month: number | null;
+    card_expiry_year: number | null;
+    e_wallet_provider: EWalletProvider | null;
+    e_wallet_identifier: string | null;
+    is_default: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    masked_number: string | null;
+    expiry: string | null;
+    logo_url: string;
+    display_identifier: string;
+    type_label: string;
+}
+
 export interface PaginatedData<T> {
     data: T[];
     current_page: number;
