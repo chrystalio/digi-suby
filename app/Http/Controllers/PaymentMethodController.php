@@ -71,6 +71,14 @@ class PaymentMethodController extends Controller
 
     public function update(UpdatePaymentMethodRequest $request, PaymentMethod $paymentMethod): RedirectResponse
     {
+        try {
+            $this->authorize('update', $paymentMethod);
+        } catch (AuthorizationException) {
+            return redirect()
+                ->route('payment-methods.index')
+                ->with('error', 'You do not have permission to update this payment method.');
+        }
+
         DB::beginTransaction();
 
         try {
