@@ -36,13 +36,17 @@ export function getColumns({
                         ? getCardLogoUrl(method.card_category)
                         : method.logo_url;
 
+                // Use smaller size for e-wallets (they have more whitespace)
+                const logoSize =
+                    method.method_type === 'card' ? 'h-9 w-9' : 'h-5 w-5';
+
                 return (
                     <div className="flex items-center gap-4">
                         <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted/30">
                             <img
                                 src={logoUrl}
                                 alt={method.type_label}
-                                className="h-7 w-auto object-contain"
+                                className={`${logoSize} object-contain`}
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     const parent =
@@ -74,8 +78,8 @@ export function getColumns({
                                 {method.method_type === 'card' &&
                                     method.card_type && (
                                         <Badge
-                                            variant="secondary"
-                                            className="shrink-0 text-xs font-normal uppercase"
+                                            variant="outline"
+                                            className="shrink-0 text-xs font-normal capitalize"
                                         >
                                             {method.card_type}
                                         </Badge>
