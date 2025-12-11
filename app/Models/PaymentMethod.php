@@ -31,6 +31,14 @@ class PaymentMethod extends Model
         'is_default',
     ];
 
+    protected $appends = [
+        'logo_url',
+        'masked_number',
+        'display_identifier',
+        'type_label',
+        'expiry',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -51,7 +59,22 @@ class PaymentMethod extends Model
 
     public function subscriptions(): HasMany
     {
+        // TODO: Create Subscription model when subscriptions feature is implemented
         return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Check if this payment method has any active subscriptions.
+     */
+    public function hasSubscriptions(): bool
+    {
+        // TODO: Implement when Subscription model exists
+        // For now, return false to allow deletion
+        if (! class_exists(Subscription::class)) {
+            return false;
+        }
+
+        return $this->subscriptions()->exists();
     }
 
     /**
@@ -84,7 +107,7 @@ class PaymentMethod extends Model
     public function getLogoUrlAttribute(): string
     {
         $domain = match ($this->method_type) {
-            PaymentMethodType::Card => $this->card_type?->logoDomain() ?? 'credit-card.com',
+            PaymentMethodType::Card => $this->card_category?->logoDomain() ?? 'credit-card.com',
             PaymentMethodType::EWallet => $this->e_wallet_provider?->logoDomain() ?? 'wallet.com',
         };
 
@@ -110,7 +133,7 @@ class PaymentMethod extends Model
     public function getTypeLabelAttribute(): string
     {
         return match ($this->method_type) {
-            PaymentMethodType::Card => $this->card_type?->label() ?? 'Card',
+            PaymentMethodType::Card => $this->card_category?->label() ?? 'Card',
             PaymentMethodType::EWallet => $this->e_wallet_provider?->label() ?? 'E-Wallet',
         };
     }
