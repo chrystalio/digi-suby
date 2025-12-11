@@ -28,6 +28,6 @@ class PaymentMethodPolicy
             return false;
         }
 
-        return $paymentMethod->subscriptions()->count() === 0;
+        return ! $paymentMethod->hasSubscriptions();
     }
 }

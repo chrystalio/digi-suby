@@ -10,11 +10,12 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { index as categories } from '@/routes/categories';
 import { dashboard } from '@/routes';
+import { index as categories } from '@/routes/categories';
+import { index as paymentMethods } from '@/routes/payment-methods';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Folder, Github, LayoutGrid } from 'lucide-react';
+import { CreditCard, Folder, Github, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -27,7 +28,12 @@ const mainNavItems: NavItem[] = [
         title: 'Categories',
         href: categories(),
         icon: Folder,
-    }
+    },
+    {
+        title: 'Payment Methods',
+        href: paymentMethods(),
+        icon: CreditCard,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -40,7 +46,7 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="floating">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
