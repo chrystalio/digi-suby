@@ -102,7 +102,7 @@ class PaymentMethod extends Model
     }
 
     /**
-     * Get the logo URL from logo.dev.
+     * Get the logo URL from logo.dev with caching.
      */
     public function getLogoUrlAttribute(): string
     {
@@ -113,7 +113,12 @@ class PaymentMethod extends Model
 
         $token = config('services.logodev.token');
 
-        return "https://img.logo.dev/{$domain}?token={$token}&size=64";
+        // Cache logo URLs for 24 hours to reduce API calls
+        return cache()->remember(
+            "logo_url:{$domain}",
+            now()->addDay(),
+            fn () => "https://img.logo.dev/{$domain}?token={$token}&size=52&retina=true&format=webp"
+        );
     }
 
     /**
