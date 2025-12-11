@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CardCategory;
 use App\Enums\CardType;
 use App\Enums\EWalletProvider;
 use App\Enums\PaymentMethodType;
+use App\Services\CardDetectionService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,6 +15,18 @@ class StorePaymentMethodRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->method_type === PaymentMethodType::Card->value && $this->filled('card_number')) {
+            $cardNumber = $this->card_number;
+
+            $this->merge([
+                'card_category' => CardDetectionService::detectCardCategory($cardNumber)->value,
+                'card_last_four' => CardDetectionService::extractLastFour($cardNumber),
+            ]);
+        }
     }
 
     /**
@@ -29,14 +43,16 @@ class StorePaymentMethodRequest extends FormRequest
         ];
 
         if ($this->method_type === PaymentMethodType::Card->value) {
-            $rules['card_last_four'] = ['required', 'string', 'size:4', 'regex:/^\d{4}$/'];
+            $rules['card_number'] = ['required', 'string', 'min:13', 'max:19', 'regex:/^[\d\s\-]+$/'];
             $rules['card_type'] = ['required', Rule::enum(CardType::class)];
+            $rules['card_category'] = ['sometimes', Rule::enum(CardCategory::class)];
+            $rules['card_last_four'] = ['sometimes', 'string', 'size:4', 'regex:/^\d{4}$/'];
             $rules['card_expiry_month'] = ['required', 'integer', 'between:1,12'];
             $rules['card_expiry_year'] = [
                 'required',
                 'integer',
-                'min:' . $currentYear,
-                'max:' . ($currentYear + 20),
+                'min:'.$currentYear,
+                'max:'.($currentYear + 20),
             ];
         }
 
@@ -54,8 +70,10 @@ class StorePaymentMethodRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'card_last_four.size' => 'Please enter the last 4 digits of your card.',
-            'card_last_four.regex' => 'Card digits must be numeric.',
+            'card_number.required' => 'Please enter your card number.',
+            'card_number.min' => 'Card number must be at least 13 digits.',
+            'card_number.max' => 'Card number must not exceed 19 digits.',
+            'card_number.regex' => 'Card number can only contain digits, spaces, and dashes.',
             'card_expiry_year.min' => 'Card expiry year must be current year or later.',
             'e_wallet_identifier.required' => 'Please enter your e-wallet phone number or email.',
         ];
@@ -64,8 +82,14 @@ class StorePaymentMethodRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            if ($this->method_type === PaymentMethodType::Card->value && $this->isCardExpired()) {
-                $validator->errors()->add('card_expiry_month', 'Card has already expired.');
+            if ($this->method_type === PaymentMethodType::Card->value) {
+                if ($this->filled('card_number') && ! CardDetectionService::validateCardNumber($this->card_number)) {
+                    $validator->errors()->add('card_number', 'The card number is invalid.');
+                }
+
+                if ($this->isCardExpired()) {
+                    $validator->errors()->add('card_expiry_month', 'Card has already expired.');
+                }
             }
         });
     }
