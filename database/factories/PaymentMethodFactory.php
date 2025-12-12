@@ -25,8 +25,8 @@ class PaymentMethodFactory extends Factory
             'user_id' => User::factory(),
             'name' => fake()->randomElement(['Personal Card', 'Business Card', 'Primary Wallet']),
             'method_type' => PaymentMethodType::Card,
-            'card_type' => CardType::Credit,
-            'card_category' => CardCategory::Visa,
+            'card_type' => CardType::Visa,
+            'card_category' => CardCategory::Credit,
             'card_last_four' => fake()->numerify('####'),
             'card_expiry_month' => fake()->numberBetween(1, 12),
             'card_expiry_year' => fake()->numberBetween(date('Y'), date('Y') + 10),
@@ -39,12 +39,12 @@ class PaymentMethodFactory extends Factory
     /**
      * Indicate that the payment method is a card.
      */
-    public function card(?CardCategory $category = null, ?CardType $type = null): static
+    public function card(?CardType $type = null, ?CardCategory $category = null): static
     {
         return $this->state(fn (array $attributes) => [
             'method_type' => PaymentMethodType::Card,
-            'card_type' => $type ?? CardType::Credit,
-            'card_category' => $category ?? CardCategory::Visa,
+            'card_type' => $type ?? CardType::Visa,
+            'card_category' => $category ?? CardCategory::Credit,
             'card_last_four' => fake()->numerify('####'),
             'card_expiry_month' => fake()->numberBetween(1, 12),
             'card_expiry_year' => fake()->numberBetween(date('Y'), date('Y') + 10),

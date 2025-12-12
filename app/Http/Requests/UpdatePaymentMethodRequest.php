@@ -30,8 +30,8 @@ class UpdatePaymentMethodRequest extends FormRequest
         ];
 
         if ($paymentMethod->method_type === PaymentMethodType::Card) {
-            $rules['card_type'] = ['required', Rule::enum(CardType::class)];
-            $rules['card_category'] = ['sometimes', Rule::enum(CardCategory::class)];
+            $rules['card_category'] = ['required', Rule::enum(CardCategory::class)];
+            $rules['card_type'] = ['sometimes', Rule::enum(CardType::class)];
             $rules['card_last_four'] = ['sometimes', 'string', 'size:4', 'regex:/^\d{4}$/'];
             $rules['card_expiry_month'] = ['required', 'integer', 'between:1,12'];
             $rules['card_expiry_year'] = [

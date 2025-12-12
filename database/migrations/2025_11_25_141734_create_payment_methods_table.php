@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignUlid('user_id')->constrained()->cascadeOnDelete();
             $table->string('name', 100);
             $table->string('method_type', 20);
-            $table->string('card_type', 20)->nullable();
-            $table->string('card_category', 20)->nullable();
+            $table->string('card_type', 20)->nullable(); // Visa, Mastercard, Amex, etc.
+            $table->string('card_category', 20)->nullable(); // Credit, Debit
             $table->string('card_last_four', 4)->nullable();
             $table->unsignedTinyInteger('card_expiry_month')->nullable();
             $table->unsignedSmallInteger('card_expiry_year')->nullable();

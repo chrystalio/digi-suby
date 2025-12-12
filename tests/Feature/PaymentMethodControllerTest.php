@@ -57,7 +57,7 @@ class PaymentMethodControllerTest extends TestCase
             ->post(route('payment-methods.store'), [
                 'name' => 'My Visa Card',
                 'method_type' => PaymentMethodType::Card->value,
-                'card_type' => CardType::Credit->value,
+                'card_category' => CardCategory::Credit->value,
                 'card_number' => '4532015112830366',
                 'card_expiry_month' => 12,
                 'card_expiry_year' => (int) date('Y') + 2,
@@ -71,8 +71,8 @@ class PaymentMethodControllerTest extends TestCase
             'user_id' => $user->id,
             'name' => 'My Visa Card',
             'method_type' => PaymentMethodType::Card->value,
-            'card_type' => CardType::Credit->value,
-            'card_category' => CardCategory::Visa->value,
+            'card_category' => CardCategory::Credit->value,
+            'card_type' => CardType::Visa->value,
             'card_last_four' => '0366',
         ]);
     }
@@ -111,7 +111,7 @@ class PaymentMethodControllerTest extends TestCase
             ->post(route('payment-methods.store'), [
                 'name' => 'New Default Card',
                 'method_type' => PaymentMethodType::Card->value,
-                'card_type' => CardType::Debit->value,
+                'card_category' => CardCategory::Debit->value,
                 'card_number' => '5555555555554444',
                 'card_expiry_month' => 12,
                 'card_expiry_year' => (int) date('Y') + 2,
@@ -125,13 +125,13 @@ class PaymentMethodControllerTest extends TestCase
 
         $this->assertDatabaseHas('payment_methods', [
             'name' => 'New Default Card',
-            'card_type' => CardType::Debit->value,
-            'card_category' => CardCategory::Mastercard->value,
+            'card_category' => CardCategory::Debit->value,
+            'card_type' => CardType::Mastercard->value,
             'is_default' => true,
         ]);
     }
 
-    public function test_card_validation_requires_card_type()
+    public function test_card_validation_requires_card_category()
     {
         $user = User::factory()->withoutTwoFactor()->create();
 
@@ -144,7 +144,7 @@ class PaymentMethodControllerTest extends TestCase
                 'card_expiry_year' => (int) date('Y') + 2,
             ]);
 
-        $response->assertSessionHasErrors('card_type');
+        $response->assertSessionHasErrors('card_category');
     }
 
     public function test_card_validation_requires_card_number()
@@ -155,7 +155,7 @@ class PaymentMethodControllerTest extends TestCase
             ->post(route('payment-methods.store'), [
                 'name' => 'My Card',
                 'method_type' => PaymentMethodType::Card->value,
-                'card_type' => CardType::Credit->value,
+                'card_category' => CardCategory::Credit->value,
                 'card_expiry_month' => 12,
                 'card_expiry_year' => (int) date('Y') + 2,
             ]);
@@ -171,7 +171,7 @@ class PaymentMethodControllerTest extends TestCase
             ->post(route('payment-methods.store'), [
                 'name' => 'My Card',
                 'method_type' => PaymentMethodType::Card->value,
-                'card_type' => CardType::Credit->value,
+                'card_category' => CardCategory::Credit->value,
                 'card_number' => '1234567890123456',
                 'card_expiry_month' => 12,
                 'card_expiry_year' => (int) date('Y') + 2,
@@ -188,7 +188,7 @@ class PaymentMethodControllerTest extends TestCase
             ->post(route('payment-methods.store'), [
                 'name' => 'Expired Card',
                 'method_type' => PaymentMethodType::Card->value,
-                'card_type' => CardType::Credit->value,
+                'card_category' => CardCategory::Credit->value,
                 'card_number' => '4532015112830366',
                 'card_expiry_month' => 1,
                 'card_expiry_year' => (int) date('Y') - 1,
@@ -221,7 +221,7 @@ class PaymentMethodControllerTest extends TestCase
         $response = $this->actingAs($user)
             ->put(route('payment-methods.update', $paymentMethod), [
                 'name' => 'Updated Name',
-                'card_type' => $paymentMethod->card_type->value,
+                'card_category' => $paymentMethod->card_category->value,
                 'card_expiry_month' => $paymentMethod->card_expiry_month,
                 'card_expiry_year' => $paymentMethod->card_expiry_year,
                 'is_default' => false,
@@ -246,7 +246,7 @@ class PaymentMethodControllerTest extends TestCase
         $response = $this->actingAs($user1)
             ->put(route('payment-methods.update', $paymentMethod), [
                 'name' => 'Hacked Name',
-                'card_type' => CardType::Credit->value,
+                'card_category' => CardCategory::Credit->value,
                 'card_expiry_month' => 12,
                 'card_expiry_year' => (int) date('Y') + 2,
             ]);
@@ -319,7 +319,7 @@ class PaymentMethodControllerTest extends TestCase
             ->post(route('payment-methods.store'), [
                 'name' => 'My Card',
                 'method_type' => PaymentMethodType::Card->value,
-                'card_type' => CardType::Credit->value,
+                'card_category' => CardCategory::Credit->value,
                 'card_number' => 'abcd1234abcd5678',
                 'card_expiry_month' => 12,
                 'card_expiry_year' => (int) date('Y') + 2,
@@ -328,24 +328,24 @@ class PaymentMethodControllerTest extends TestCase
         $response->assertSessionHasErrors('card_number');
     }
 
-    public function test_card_category_is_detected_automatically()
+    public function test_card_type_is_detected_automatically()
     {
         $user = User::factory()->withoutTwoFactor()->create();
 
         $testCases = [
-            ['card_number' => '4532015112830366', 'expected_category' => CardCategory::Visa],
-            ['card_number' => '5555555555554444', 'expected_category' => CardCategory::Mastercard],
-            ['card_number' => '378282246310005', 'expected_category' => CardCategory::Amex],
-            ['card_number' => '6011111111111117', 'expected_category' => CardCategory::Discover],
-            ['card_number' => '3530111333300000', 'expected_category' => CardCategory::Jcb],
+            ['card_number' => '4532015112830366', 'expected_type' => CardType::Visa],
+            ['card_number' => '5555555555554444', 'expected_type' => CardType::Mastercard],
+            ['card_number' => '378282246310005', 'expected_type' => CardType::Amex],
+            ['card_number' => '6011111111111117', 'expected_type' => CardType::Discover],
+            ['card_number' => '3530111333300000', 'expected_type' => CardType::Jcb],
         ];
 
         foreach ($testCases as $testCase) {
             $this->actingAs($user)
                 ->post(route('payment-methods.store'), [
-                    'name' => "Test {$testCase['expected_category']->value} Card",
+                    'name' => "Test {$testCase['expected_type']->value} Card",
                     'method_type' => PaymentMethodType::Card->value,
-                    'card_type' => CardType::Credit->value,
+                    'card_category' => CardCategory::Credit->value,
                     'card_number' => $testCase['card_number'],
                     'card_expiry_month' => 12,
                     'card_expiry_year' => (int) date('Y') + 2,
@@ -354,7 +354,7 @@ class PaymentMethodControllerTest extends TestCase
 
             $this->assertDatabaseHas('payment_methods', [
                 'user_id' => $user->id,
-                'card_category' => $testCase['expected_category']->value,
+                'card_type' => $testCase['expected_type']->value,
                 'card_last_four' => substr($testCase['card_number'], -4),
             ]);
         }

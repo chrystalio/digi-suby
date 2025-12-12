@@ -27,14 +27,14 @@ export interface Flash {
 }
 
 export type PaymentMethodType = 'card' | 'e_wallet';
-export type CardType = 'credit' | 'debit';
-export type CardCategory =
+export type CardType =
     | 'visa'
     | 'mastercard'
     | 'amex'
     | 'jcb'
     | 'discover'
     | 'other';
+export type CardCategory = 'credit' | 'debit';
 export type EWalletProvider =
     | 'dana'
     | 'ovo'

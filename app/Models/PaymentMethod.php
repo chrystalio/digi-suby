@@ -107,7 +107,7 @@ class PaymentMethod extends Model
     public function getLogoUrlAttribute(): string
     {
         $domain = match ($this->method_type) {
-            PaymentMethodType::Card => $this->card_category?->logoDomain() ?? 'credit-card.com',
+            PaymentMethodType::Card => $this->card_type?->logoDomain() ?? 'credit-card.com',
             PaymentMethodType::EWallet => $this->e_wallet_provider?->logoDomain() ?? 'wallet.com',
         };
 
@@ -138,7 +138,7 @@ class PaymentMethod extends Model
     public function getTypeLabelAttribute(): string
     {
         return match ($this->method_type) {
-            PaymentMethodType::Card => $this->card_category?->label() ?? 'Card',
+            PaymentMethodType::Card => $this->card_type?->label() ?? 'Card',
             PaymentMethodType::EWallet => $this->e_wallet_provider?->label() ?? 'E-Wallet',
         };
     }

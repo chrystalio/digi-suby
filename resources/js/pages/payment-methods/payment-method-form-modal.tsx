@@ -23,7 +23,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import {
-    detectCardCategory,
+    detectCardType,
     formatCardNumber,
     getCardBrandName,
     getCardLogoUrl,
@@ -74,17 +74,17 @@ export function PaymentMethodFormModal({
 }: PaymentMethodFormModalProps) {
     const isEditing = !!paymentMethod;
     const currentYear = new Date().getFullYear();
-    const [detectedCardCategory, setDetectedCardCategory] =
-        useState<CardCategory>('other');
+    const [detectedCardType, setDetectedCardType] =
+        useState<CardType>('other');
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors, reset} = useForm({
         name: paymentMethod?.name ?? '',
         method_type: (paymentMethod?.method_type ??
             'card') as PaymentMethodType,
         card_number: '',
-        card_type: (paymentMethod?.card_type ?? 'credit') as CardType | null,
+        card_type: (paymentMethod?.card_type ?? 'visa') as CardType | null,
         card_category: (paymentMethod?.card_category ??
-            'visa') as CardCategory | null,
+            'credit') as CardCategory | null,
         card_last_four: (paymentMethod?.card_last_four ?? '') as string | null,
         card_expiry_month: (paymentMethod?.card_expiry_month?.toString() ??
             '') as string | null,
@@ -106,9 +106,9 @@ export function PaymentMethodFormModal({
                     'card') as PaymentMethodType,
                 card_number: '',
                 card_type: (paymentMethod?.card_type ??
-                    'credit') as CardType | null,
+                    'visa') as CardType | null,
                 card_category: (paymentMethod?.card_category ??
-                    'visa') as CardCategory | null,
+                    'credit') as CardCategory | null,
                 card_last_four: (paymentMethod?.card_last_four ?? '') as
                     | string
                     | null,
@@ -127,7 +127,7 @@ export function PaymentMethodFormModal({
                 is_default: paymentMethod?.is_default ?? false,
             };
             setData(formData);
-            setDetectedCardCategory(paymentMethod?.card_category ?? 'other');
+            setDetectedCardType(paymentMethod?.card_type ?? 'other');
         } else {
             reset();
         }
@@ -137,10 +137,10 @@ export function PaymentMethodFormModal({
     const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         const formatted = formatCardNumber(value);
-        const detected = detectCardCategory(value);
+        const detected = detectCardType(value);
 
         setData('card_number', formatted);
-        setDetectedCardCategory(detected);
+        setDetectedCardType(detected);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -270,18 +270,18 @@ export function PaymentMethodFormModal({
                         {data.method_type === 'card' && (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="card_type">Card Type</Label>
+                                    <Label htmlFor="card_category">Card Category</Label>
                                     <Select
-                                        value={data.card_type ?? undefined}
+                                        value={data.card_category ?? undefined}
                                         onValueChange={(value) =>
                                             setData(
-                                                'card_type',
-                                                value as CardType,
+                                                'card_category',
+                                                value as CardCategory,
                                             )
                                         }
                                     >
-                                        <SelectTrigger id="card_type">
-                                            <SelectValue placeholder="Select card type" />
+                                        <SelectTrigger id="card_category">
+                                            <SelectValue placeholder="Select card category" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="credit">
@@ -292,9 +292,9 @@ export function PaymentMethodFormModal({
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    {errors.card_type && (
+                                    {errors.card_category && (
                                         <p className="text-sm text-destructive">
-                                            {errors.card_type}
+                                            {errors.card_category}
                                         </p>
                                     )}
                                 </div>
@@ -316,10 +316,10 @@ export function PaymentMethodFormModal({
                                             <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
                                                 <img
                                                     src={getCardLogoUrl(
-                                                        detectedCardCategory,
+                                                        detectedCardType,
                                                     )}
                                                     alt={getCardBrandName(
-                                                        detectedCardCategory,
+                                                        detectedCardType,
                                                     )}
                                                     className="h-6 w-auto object-contain"
                                                     onError={(e) => {
@@ -343,10 +343,10 @@ export function PaymentMethodFormModal({
                                     )}
                                     {isEditing && (
                                         <p className="text-xs text-muted-foreground">
-                                            {data.card_category && (
+                                            {data.card_type && (
                                                 <>
                                                     {getCardBrandName(
-                                                        data.card_category,
+                                                        data.card_type,
                                                     )}{' '}
                                                     •••• •••• ••••{' '}
                                                     {data.card_last_four}

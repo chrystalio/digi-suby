@@ -23,7 +23,7 @@ class StorePaymentMethodRequest extends FormRequest
             $cardNumber = $this->card_number;
 
             $this->merge([
-                'card_category' => CardDetectionService::detectCardCategory($cardNumber)->value,
+                'card_type' => CardDetectionService::detectCardCategory($cardNumber)->value,
                 'card_last_four' => CardDetectionService::extractLastFour($cardNumber),
             ]);
         }
@@ -44,8 +44,8 @@ class StorePaymentMethodRequest extends FormRequest
 
         if ($this->method_type === PaymentMethodType::Card->value) {
             $rules['card_number'] = ['required', 'string', 'min:13', 'max:19', 'regex:/^[\d\s\-]+$/'];
-            $rules['card_type'] = ['required', Rule::enum(CardType::class)];
-            $rules['card_category'] = ['sometimes', Rule::enum(CardCategory::class)];
+            $rules['card_category'] = ['required', Rule::enum(CardCategory::class)];
+            $rules['card_type'] = ['sometimes', Rule::enum(CardType::class)];
             $rules['card_last_four'] = ['sometimes', 'string', 'size:4', 'regex:/^\d{4}$/'];
             $rules['card_expiry_month'] = ['required', 'integer', 'between:1,12'];
             $rules['card_expiry_year'] = [

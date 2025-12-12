@@ -1,7 +1,7 @@
-import { CardCategory } from '@/types';
+import { CardType } from '@/types';
 
 export interface CardInfo {
-    category: CardCategory;
+    type: CardType;
     pattern: RegExp;
     length: number[];
     cvcLength: number[];
@@ -9,32 +9,32 @@ export interface CardInfo {
 
 const cardPatterns: CardInfo[] = [
     {
-        category: 'visa',
+        type: 'visa',
         pattern: /^4/,
         length: [13, 16, 19],
         cvcLength: [3],
     },
     {
-        category: 'mastercard',
+        type: 'mastercard',
         pattern: /^(5[1-5]|2[2-7])/,
         length: [16],
         cvcLength: [3],
     },
     {
-        category: 'amex',
+        type: 'amex',
         pattern: /^3[47]/,
         length: [15],
         cvcLength: [4],
     },
     {
-        category: 'discover',
+        type: 'discover',
         pattern:
             /^(6011|622(1(2[6-9]|[3-9][0-9])|[2-8][0-9]{2}|9([0-1][0-9]|2[0-5]))|64[4-9]|65)/,
         length: [16],
         cvcLength: [3],
     },
     {
-        category: 'jcb',
+        type: 'jcb',
         pattern: /^35(2[8-9]|[3-8][0-9])/,
         length: [16],
         cvcLength: [3],
@@ -42,15 +42,15 @@ const cardPatterns: CardInfo[] = [
 ];
 
 /**
- * Detect card category from card number (Visa, Mastercard, etc.)
+ * Detect card type from card number (Visa, Mastercard, etc.)
  */
-export function detectCardCategory(cardNumber: string): CardCategory {
+export function detectCardType(cardNumber: string): CardType {
     // Remove spaces and dashes
     const cleanNumber = cardNumber.replace(/[\s-]/g, '');
 
     for (const card of cardPatterns) {
         if (card.pattern.test(cleanNumber)) {
-            return card.category;
+            return card.type;
         }
     }
 
@@ -60,8 +60,8 @@ export function detectCardCategory(cardNumber: string): CardCategory {
 /**
  * Get card brand name for display
  */
-export function getCardBrandName(cardCategory: CardCategory): string {
-    const brandNames: Record<CardCategory, string> = {
+export function getCardBrandName(cardType: CardType): string {
+    const brandNames: Record<CardType, string> = {
         visa: 'Visa',
         mastercard: 'Mastercard',
         amex: 'American Express',
@@ -70,7 +70,7 @@ export function getCardBrandName(cardCategory: CardCategory): string {
         other: 'Card',
     };
 
-    return brandNames[cardCategory] || 'Card';
+    return brandNames[cardType] || 'Card';
 }
 
 /**
@@ -78,10 +78,10 @@ export function getCardBrandName(cardCategory: CardCategory): string {
  */
 export function formatCardNumber(cardNumber: string): string {
     const cleanNumber = cardNumber.replace(/[\s-]/g, '');
-    const cardCategory = detectCardCategory(cleanNumber);
+    const cardType = detectCardType(cleanNumber);
 
     // Amex format: 4-6-5
-    if (cardCategory === 'amex') {
+    if (cardType === 'amex') {
         return cleanNumber.replace(/(\d{4})(\d{6})(\d{5})/, '$1 $2 $3').trim();
     }
 
@@ -128,11 +128,11 @@ export function validateCardNumber(cardNumber: string): boolean {
 }
 
 /**
- * Get logo URL from logo.dev for card category
+ * Get logo URL from logo.dev for card type
  * Note: Backend caches these URLs for 24 hours to reduce API calls
  */
-export function getCardLogoUrl(cardCategory: CardCategory): string {
-    const logoDomains: Record<CardCategory, string> = {
+export function getCardLogoUrl(cardType: CardType): string {
+    const logoDomains: Record<CardType, string> = {
         visa: 'visa.com',
         mastercard: 'mastercard.com',
         amex: 'americanexpress.com',
@@ -141,7 +141,7 @@ export function getCardLogoUrl(cardCategory: CardCategory): string {
         other: 'credit-card.com',
     };
 
-    const domain = logoDomains[cardCategory] || 'credit-card.com';
+    const domain = logoDomains[cardType] || 'credit-card.com';
     const token = import.meta.env.VITE_LOGODEV_TOKEN || '';
 
     return `https://img.logo.dev/${domain}?token=${token}&size=52&retina=true&format=webp`;

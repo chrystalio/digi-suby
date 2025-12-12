@@ -34,8 +34,8 @@ export function getColumns({
             cell: ({ row }) => {
                 const method = row.original;
                 const logoUrl =
-                    method.method_type === 'card' && method.card_category
-                        ? getCardLogoUrl(method.card_category)
+                    method.method_type === 'card' && method.card_type
+                        ? getCardLogoUrl(method.card_type)
                         : method.logo_url;
 
                 // Use smaller size for e-wallets (they have more whitespace)
@@ -78,12 +78,12 @@ export function getColumns({
                                     {method.name}
                                 </span>
                                 {method.method_type === 'card' &&
-                                    method.card_type && (
+                                    method.card_category && (
                                         <Badge
                                             variant="outline"
                                             className="shrink-0 text-xs font-normal capitalize"
                                         >
-                                            {method.card_type}
+                                            {method.card_category}
                                         </Badge>
                                     )}
                             </div>
