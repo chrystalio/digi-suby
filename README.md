@@ -29,12 +29,13 @@ A modern subscription management application built with Laravel 12 and React 19.
 - [ ] Category-based filtering and reports
 
 #### Payment Methods
-- [ ] Payment method management (cards & e-wallets)
-- [ ] Card type auto-detection (Visa, Mastercard, Amex, etc.)
-- [ ] E-wallet support (DANA, OVO, GoPay, Apple Pay, Google Pay, etc.)
-- [ ] Secure storage (only last 4 digits stored)
-- [ ] Payment method logos via logo.dev
-- [ ] Expiry warnings for cards
+- [x] Payment method management (cards & e-wallets)
+- [x] Card type auto-detection (Visa, Mastercard, Amex, etc.)
+- [x] E-wallet support (DANA, OVO, GoPay, Apple Pay, Google Pay, etc.)
+- [x] Secure storage (only last 4 digits stored)
+- [x] Payment method logos via logo.dev
+- [x] Set default payment method
+- [x] Card expiry tracking and validation
 
 #### Services & Subscriptions
 - [ ] Service library with popular subscriptions
@@ -66,13 +67,19 @@ A modern subscription management application built with Laravel 12 and React 19.
 - [x] Reusable DataTable component
 - [x] Icon picker component
 - [x] Toast notifications
+- [x] Payment methods management (cards & e-wallets)
+- [x] Card type auto-detection with Luhn validation
+- [x] E-wallet provider support (7 providers)
+- [x] Payment method policies and authorization
+- [x] Default payment method functionality
+- [x] Logo.dev integration with caching
 
 ### In Progress
-- [ ] Payment methods management (cards & e-wallets)
+- [ ] Services/subscriptions CRUD
 
 ### Next Up
-- [ ] Services/subscriptions CRUD
 - [ ] Dashboard with analytics
+- [ ] Subscription tracking and management
 
 ## Installation
 
