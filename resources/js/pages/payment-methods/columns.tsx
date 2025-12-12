@@ -19,11 +19,13 @@ import { MoreHorizontal, Pencil, Star, Trash2 } from 'lucide-react';
 interface GetColumnsProps {
     onEdit: (paymentMethod: PaymentMethod) => void;
     onDelete: (paymentMethod: PaymentMethod) => void;
+    onSetDefault: (paymentMethod: PaymentMethod) => void;
 }
 
 export function getColumns({
     onEdit,
     onDelete,
+    onSetDefault,
 }: GetColumnsProps): ColumnDef<PaymentMethod>[] {
     return [
         {
@@ -185,6 +187,14 @@ export function getColumns({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            {!method.is_default && (
+                                <DropdownMenuItem
+                                    onClick={() => onSetDefault(method)}
+                                >
+                                    <Star className="mr-2 h-4 w-4" />
+                                    Set as Default
+                                </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => onEdit(method)}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit

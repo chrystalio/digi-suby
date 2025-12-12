@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('payment-methods', [PaymentMethodController::class, 'store'])->name('payment-methods.store');
     Route::put('payment-methods/{payment_method}', [PaymentMethodController::class, 'update'])->name('payment-methods.update');
     Route::delete('payment-methods/{payment_method}', [PaymentMethodController::class, 'destroy'])->name('payment-methods.destroy');
+    Route::post('payment-methods/{payment_method}/default', [PaymentMethodController::class, 'setDefault'])->name('payment-methods.set-default');
 });
 
 require __DIR__.'/settings.php';

@@ -359,4 +359,47 @@ class PaymentMethodControllerTest extends TestCase
             ]);
         }
     }
+
+    public function test_users_can_set_default_payment_method()
+    {
+        $user = User::factory()->withoutTwoFactor()->create();
+
+        $existingDefault = PaymentMethod::factory()->for($user)->default()->create();
+        $newDefault = PaymentMethod::factory()->for($user)->create(['is_default' => false]);
+
+        $response = $this->actingAs($user)
+            ->post(route('payment-methods.set-default', $newDefault));
+
+        $response->assertRedirect(route('payment-methods.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('payment_methods', [
+            'id' => $newDefault->id,
+            'is_default' => true,
+        ]);
+
+        $this->assertDatabaseHas('payment_methods', [
+            'id' => $existingDefault->id,
+            'is_default' => false,
+        ]);
+    }
+
+    public function test_users_cannot_set_default_for_others_payment_methods()
+    {
+        $user1 = User::factory()->withoutTwoFactor()->create();
+        $user2 = User::factory()->withoutTwoFactor()->create();
+
+        $paymentMethod = PaymentMethod::factory()->for($user2)->create(['is_default' => false]);
+
+        $response = $this->actingAs($user1)
+            ->post(route('payment-methods.set-default', $paymentMethod));
+
+        $response->assertRedirect(route('payment-methods.index'))
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('payment_methods', [
+            'id' => $paymentMethod->id,
+            'is_default' => false,
+        ]);
+    }
 }

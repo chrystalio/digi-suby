@@ -1,4 +1,7 @@
-import { destroy } from '@/actions/App/Http/Controllers/PaymentMethodController';
+import {
+    destroy,
+    setDefault,
+} from '@/actions/App/Http/Controllers/PaymentMethodController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -72,6 +75,10 @@ export default function Index({ paymentMethods }: PaymentMethodsIndexProps) {
         setIsDeleteDialogOpen(true);
     };
 
+    const handleSetDefault = (paymentMethod: PaymentMethod) => {
+        router.post(setDefault.url(paymentMethod.id), {});
+    };
+
     const confirmDelete = () => {
         if (deletingPaymentMethod) {
             router.delete(destroy.url(deletingPaymentMethod.id), {
@@ -84,7 +91,12 @@ export default function Index({ paymentMethods }: PaymentMethodsIndexProps) {
     };
 
     const columns = useMemo(
-        () => getColumns({ onEdit: handleEdit, onDelete: handleDelete }),
+        () =>
+            getColumns({
+                onEdit: handleEdit,
+                onDelete: handleDelete,
+                onSetDefault: handleSetDefault,
+            }),
         [],
     );
 
