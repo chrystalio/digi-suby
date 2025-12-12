@@ -138,4 +138,41 @@ class PaymentMethodController extends Controller
                 ->with('error', 'Failed to delete payment method. Please try again.');
         }
     }
+
+    public function setDefault(Request $request, PaymentMethod $paymentMethod): RedirectResponse
+    {
+        try {
+            $this->authorize('update', $paymentMethod);
+        } catch (AuthorizationException) {
+            return redirect()
+                ->route('payment-methods.index')
+                ->with('error', 'You do not have permission to update this payment method.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Unset other defaults
+            PaymentMethod::query()
+                ->where('user_id', $request->user()->id)
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
+
+            $paymentMethod->update(['is_default' => true]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('payment-methods.index')
+                ->with('success', 'Default payment method updated.');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Set default payment method failed', ['error' => $e->getMessage(), 'payment_method_id' => $paymentMethod->id]);
+
+            return redirect()
+                ->route('payment-methods.index')
+                ->with('error', 'Failed to set default payment method. Please try again.');
+        }
+    }
 }
