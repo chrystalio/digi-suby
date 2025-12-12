@@ -129,7 +129,7 @@ export function validateCardNumber(cardNumber: string): boolean {
 
 /**
  * Get logo URL from logo.dev for card type
- * Note: Backend caches these URLs for 24 hours to reduce API calls
+ * Note: Backend caches these URLs for 90 days - logos are static assets
  */
 export function getCardLogoUrl(cardType: CardType): string {
     const logoDomains: Record<CardType, string> = {

@@ -113,10 +113,10 @@ class PaymentMethod extends Model
 
         $token = config('services.logodev.token');
 
-        // Cache logo URLs for 24 hours to reduce API calls
+        // Cache logo URLs for 90 days - logos are static assets that rarely change
         return cache()->remember(
             "logo_url:{$domain}",
-            now()->addDay(),
+            now()->addDays(90),
             fn () => "https://img.logo.dev/{$domain}?token={$token}&size=52&retina=true&format=webp"
         );
     }
