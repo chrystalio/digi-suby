@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -27,6 +28,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('payment-methods/{payment_method}', [PaymentMethodController::class, 'update'])->name('payment-methods.update');
     Route::delete('payment-methods/{payment_method}', [PaymentMethodController::class, 'destroy'])->name('payment-methods.destroy');
     Route::post('payment-methods/{payment_method}/default', [PaymentMethodController::class, 'setDefault'])->name('payment-methods.set-default');
+
+    Route::get('services', [ServiceController::class, 'index'])->name('services.index');
+    Route::post('services', [ServiceController::class, 'store'])->name('services.store');
+    Route::put('services/{service}', [ServiceController::class, 'update'])->name('services.update');
+    Route::delete('services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
 });
 
 require __DIR__.'/settings.php';
