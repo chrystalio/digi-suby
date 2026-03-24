@@ -144,5 +144,10 @@ export function getCardLogoUrl(cardType: CardType): string {
     const domain = logoDomains[cardType] || 'credit-card.com';
     const token = import.meta.env.VITE_LOGODEV_TOKEN || '';
 
-    return `https://img.logo.dev/${domain}?token=${token}&size=52&retina=true&format=webp`;
+    // Get theme from appearance cookie (light/dark/system), default to light
+    const match = document.cookie.match(/(?:^|; )appearance=([^;]*)/);
+    const appearance = match ? decodeURIComponent(match[1]) : 'system';
+    const theme = appearance === 'dark' ? 'dark' : 'light';
+
+    return `https://img.logo.dev/${domain}?token=${token}&size=52&retina=true&format=webp&theme=${theme}`;
 }
