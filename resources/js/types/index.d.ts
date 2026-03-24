@@ -67,6 +67,36 @@ export interface PaymentMethod {
     type_label: string;
 }
 
+export interface Service {
+    id: string;
+    name: string;
+    slug: string;
+    url: string | null;
+    logo: string | null;
+    category: {
+        id: string;
+        name: string;
+        color: string;
+        icon: string | null;
+    } | null;
+    is_system: boolean;
+    can_edit: boolean;
+    can_delete: boolean;
+}
+
+export interface ServicesFilters {
+    search: string;
+    category: string;
+    type: string;
+    per_page: number;
+}
+
+export interface ServiceFormData {
+    name: string;
+    url: string;
+    category_id: string;
+}
+
 export interface PaginatedData<T> {
     data: T[];
     current_page: number;
