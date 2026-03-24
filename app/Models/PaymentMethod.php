@@ -113,11 +113,20 @@ class PaymentMethod extends Model
 
         $token = config('services.logodev.token');
 
+        // Get theme from cookie (light/dark/system), default to light
+        $appearance = request()->cookie('appearance', 'system');
+        $theme = match ($appearance) {
+            'light' => 'light',
+            'dark' => 'dark',
+            default => 'light',
+        };
+
         // Cache logo URLs for 90 days - logos are static assets that rarely change
+        // Include theme in cache key to support both light and dark modes
         return cache()->remember(
-            "logo_url:{$domain}",
+            "logo_url:{$domain}:{$theme}",
             now()->addDays(90),
-            fn () => "https://img.logo.dev/{$domain}?token={$token}&size=52&retina=true&format=webp"
+            fn () => "https://img.logo.dev/{$domain}?token={$token}&size=52&retina=true&format=webp&theme={$theme}"
         );
     }
 
