@@ -13,9 +13,10 @@ import {
 import { dashboard } from '@/routes';
 import { index as categories } from '@/routes/categories';
 import { index as paymentMethods } from '@/routes/payment-methods';
+import { index as services } from '@/routes/services';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { CreditCard, Folder, Github, LayoutGrid } from 'lucide-react';
+import { CreditCard, Folder, Github, LayoutGrid, Package } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -28,6 +29,11 @@ const mainNavItems: NavItem[] = [
         title: 'Categories',
         href: categories(),
         icon: Folder,
+    },
+    {
+        title: 'Services',
+        href: services(),
+        icon: Package,
     },
     {
         title: 'Payment Methods',
