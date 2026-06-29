@@ -9,7 +9,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -57,14 +56,6 @@ interface Props {
     filters: SubscriptionsFilters;
 }
 
-function statusVariant(
-    status: Subscription['status'],
-): 'default' | 'secondary' | 'outline' {
-    if (status === 'active') return 'default';
-    if (status === 'trial') return 'secondary';
-    return 'outline';
-}
-
 interface SubscriptionCardProps {
     subscription: Subscription;
     onEdit: (subscription: Subscription) => void;
@@ -73,25 +64,28 @@ interface SubscriptionCardProps {
 function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    const statusColor = {
-        active: 'bg-emerald-500',
-        trial: 'bg-sky-500',
-        cancelled: 'bg-amber-500',
-    }[subscription.status] ?? 'bg-slate-400';
+    const statusGradient = {
+        active: 'from-emerald-500 to-emerald-700',
+        trial: 'from-sky-500 to-sky-700',
+        cancelled: 'from-amber-600 to-amber-800',
+    }[subscription.status] ?? 'from-slate-500 to-slate-700';
 
     return (
         <>
-            <div className="group relative overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
-                {/* Status-driven color stripe along the top edge */}
-                <div className={cn('h-1', statusColor)} aria-hidden="true" />
-
-                <div className="flex flex-col items-center p-5">
-                    {/* Action menu — top-right corner overlaying the card */}
+            <div className="group relative overflow-hidden rounded-xl border bg-card text-card-foreground transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lg focus-within:ring-2 focus-within:ring-ring">
+                {/* Magazine-cover top — status gradient */}
+                <div
+                    className={cn(
+                        'relative bg-gradient-to-b p-5 pb-6 text-center text-white',
+                        statusGradient,
+                    )}
+                >
+                    {/* Action menu — top-right of the colored section */}
                     {(subscription.can_edit || subscription.can_delete) && (
-                        <div className="absolute right-2 top-3">
+                        <div className="absolute right-2 top-2 z-10">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-accent">
+                                    <button className="rounded-md p-1 text-white/70 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-white/15 hover:text-white">
                                         <MoreHorizontal className="h-4 w-4" />
                                     </button>
                                 </DropdownMenuTrigger>
@@ -126,53 +120,64 @@ function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
                         </div>
                     )}
 
-                    {/* Hero logo — big, centered */}
-                    <ServiceLogo
-                        src={subscription.service?.logo ?? null}
-                        alt={subscription.service?.name ?? subscription.name}
-                        size="xl"
-                    />
+                    {/* Status eyebrow label — small, uppercase, white */}
+                    <div className="flex items-center justify-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-90">
+                        <span className="h-1.5 w-1.5 rounded-full bg-white shadow-sm" />
+                        <span>{subscription.status}</span>
+                    </div>
 
-                    {/* Name (2 lines max) */}
-                    <h4 className="mt-3 line-clamp-2 text-center text-sm font-semibold">
+                    {/* Hero logo — big, centered */}
+                    <div className="mt-3 flex justify-center">
+                        <ServiceLogo
+                            src={subscription.service?.logo ?? null}
+                            alt={
+                                subscription.service?.name ?? subscription.name
+                            }
+                            size="xl"
+                        />
+                    </div>
+
+                    {/* Amount — hero number, white */}
+                    <div className="mt-3 flex items-baseline justify-center gap-1">
+                        <span className="text-2xl font-semibold">
+                            {subscription.display_amount}
+                        </span>
+                        <span className="text-xs opacity-90">
+                            / {subscription.interval}
+                        </span>
+                    </div>
+
+                    {/* Urgency pills — white-on-color so they stand out */}
+                    {(subscription.is_trial_ending_soon ||
+                        subscription.is_renewing_soon) && (
+                        <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+                            {subscription.is_trial_ending_soon && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-xs">
+                                    <CalendarClock className="h-3 w-3" />
+                                    trial ends soon
+                                </span>
+                            )}
+                            {subscription.is_renewing_soon && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-xs">
+                                    renewing soon
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Bottom white section — name + next-billing */}
+                <div className="p-5">
+                    <h4 className="line-clamp-2 text-center text-sm font-semibold">
                         {subscription.name}
                     </h4>
-
-                    {/* Service subtitle */}
                     {subscription.service && (
                         <p className="mt-0.5 line-clamp-1 text-center text-xs text-muted-foreground">
                             {subscription.service.name}
                         </p>
                     )}
 
-                    {/* Status badges row — color-coded by status */}
-                    <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
-                        <Badge variant={statusVariant(subscription.status)}>
-                            {subscription.status}
-                        </Badge>
-                        {subscription.is_trial_ending_soon && (
-                            <Badge variant="secondary">
-                                <CalendarClock className="mr-1 h-3 w-3" />
-                                trial ends soon
-                            </Badge>
-                        )}
-                        {subscription.is_renewing_soon && (
-                            <Badge>renewing soon</Badge>
-                        )}
-                    </div>
-
-                    {/* Amount + interval — hero number */}
-                    <div className="mt-4 flex items-baseline gap-1">
-                        <span className="text-2xl font-semibold">
-                            {subscription.display_amount}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                            / {subscription.interval}
-                        </span>
-                    </div>
-
-                    {/* Next billing — separated by border-top */}
-                    <div className="mt-4 w-full border-t pt-3 text-xs text-muted-foreground">
+                    <div className="mt-3 text-xs text-muted-foreground">
                         {subscription.is_lifetime ? (
                             <span className="block text-center">
                                 Lifetime — no recurring charge
