@@ -97,6 +97,122 @@ export interface ServiceFormData {
     category_id: string;
 }
 
+// --- Subscription domain ---
+// String-literal unions mirror app/Enums/*.php — keep in sync.
+
+export type Currency =
+    | 'USD'
+    | 'EUR'
+    | 'GBP'
+    | 'IDR'
+    | 'JPY'
+    | 'AUD'
+    | 'CAD'
+    | 'SGD'
+    | 'MYR'
+    | 'PHP';
+
+export type SubscriptionInterval =
+    | 'weekly'
+    | 'monthly'
+    | 'quarterly'
+    | 'yearly'
+    | 'lifetime';
+
+export type SubscriptionStatus = 'active' | 'trial' | 'cancelled';
+
+export const CURRENCY_OPTIONS: {
+    value: Currency;
+    label: string;
+    symbol: string;
+}[] = [
+    { value: 'USD', label: 'US Dollar', symbol: '$' },
+    { value: 'EUR', label: 'Euro', symbol: '€' },
+    { value: 'GBP', label: 'British Pound', symbol: '£' },
+    { value: 'IDR', label: 'Indonesian Rupiah', symbol: 'Rp' },
+    { value: 'JPY', label: 'Japanese Yen', symbol: '¥' },
+    { value: 'AUD', label: 'Australian Dollar', symbol: 'A$' },
+    { value: 'CAD', label: 'Canadian Dollar', symbol: 'C$' },
+    { value: 'SGD', label: 'Singapore Dollar', symbol: 'S$' },
+    { value: 'MYR', label: 'Malaysian Ringgit', symbol: 'RM' },
+    { value: 'PHP', label: 'Philippine Peso', symbol: '₱' },
+];
+
+export const INTERVAL_OPTIONS: {
+    value: SubscriptionInterval;
+    label: string;
+}[] = [
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'quarterly', label: 'Quarterly' },
+    { value: 'yearly', label: 'Yearly' },
+    { value: 'lifetime', label: 'Lifetime' },
+];
+
+export const STATUS_OPTIONS: {
+    value: SubscriptionStatus;
+    label: string;
+}[] = [
+    { value: 'active', label: 'Active' },
+    { value: 'trial', label: 'Trial' },
+    { value: 'cancelled', label: 'Cancelled' },
+];
+
+export interface Subscription {
+    id: string;
+    name: string;
+    amount: string;
+    currency: Currency;
+    interval: SubscriptionInterval;
+    status: SubscriptionStatus;
+    next_billing_date: string | null;
+    started_at: string | null;
+    trial_ends_at: string | null;
+    cancelled_at: string | null;
+    notes: string | null;
+    display_amount: string;
+    days_until_next_billing: number | null;
+    is_trial_ending_soon: boolean;
+    is_renewing_soon: boolean;
+    is_cancelled: boolean;
+    is_lifetime: boolean;
+    monthly_equivalent: number;
+    service: {
+        id: string;
+        name: string;
+        slug: string;
+        logo: string | null;
+    } | null;
+    payment_method: {
+        id: string;
+        name: string;
+        card_last_four: string | null;
+    } | null;
+    can_edit: boolean;
+    can_delete: boolean;
+}
+
+export interface SubscriptionsFilters {
+    search: string;
+    status: string;
+    currency: string;
+    per_page: number;
+}
+
+export interface SubscriptionFormData {
+    service_id: string;
+    payment_method_id: string | null;
+    name: string;
+    amount: string;
+    currency: Currency;
+    interval: SubscriptionInterval;
+    status: SubscriptionStatus;
+    next_billing_date: string;
+    started_at: string;
+    trial_ends_at: string | null;
+    notes: string;
+}
+
 export interface PaginatedData<T> {
     data: T[];
     current_page: number;
