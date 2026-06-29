@@ -176,11 +176,11 @@ class SubscriptionTest extends TestCase
     public function test_scope_for_currency(): void
     {
         Subscription::factory()->create(['currency' => Currency::USD]);
-        Subscription::factory()->create(['currency' => Currency::EUR]);
+        Subscription::factory()->create(['currency' => Currency::IDR]);
         Subscription::factory()->create(['currency' => Currency::USD]);
 
         $this->assertCount(2, Subscription::forCurrency(Currency::USD)->get());
-        $this->assertCount(1, Subscription::forCurrency(Currency::EUR)->get());
+        $this->assertCount(1, Subscription::forCurrency(Currency::IDR)->get());
     }
 
     public function test_relations(): void
