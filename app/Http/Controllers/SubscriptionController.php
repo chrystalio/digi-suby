@@ -73,12 +73,24 @@ class SubscriptionController extends Controller
         $services = Service::query()
             ->visibleTo($user)
             ->orderBy('name')
-            ->get(['id', 'name', 'is_system']);
+            ->get()
+            ->map(fn (Service $service) => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'is_system' => $service->is_system,
+                'logo' => $service->logo, // accessor — returns null if no url
+            ]);
 
         $paymentMethods = PaymentMethod::query()
             ->where('user_id', $user->id)
             ->orderBy('name')
-            ->get(['id', 'name', 'method_type', 'card_last_four', 'card_type', 'e_wallet_provider']);
+            ->get()
+            ->map(fn (PaymentMethod $pm) => [
+                'id' => $pm->id,
+                'name' => $pm->name,
+                'card_last_four' => $pm->card_last_four,
+                'logo_url' => $pm->logo_url, // accessor
+            ]);
 
         return Inertia::render('subscriptions/index', [
             'subscriptions' => $subscriptions,
