@@ -4,7 +4,7 @@ import { Box } from 'lucide-react';
 interface Props {
     src: string | null;
     alt: string;
-    size?: 'xs' | 'sm' | 'md' | 'lg';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     className?: string;
 }
 
@@ -13,6 +13,7 @@ const sizeClasses = {
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
     lg: 'h-12 w-12',
+    xl: 'h-20 w-20',
 }
 
 export function ServiceLogo({ src, alt, size = 'md', className }: Props) {
