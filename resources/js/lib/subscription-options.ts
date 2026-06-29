@@ -7,18 +7,10 @@ import type {
 export const CURRENCY_OPTIONS: {
     value: Currency;
     label: string;
-    symbol: string;
 }[] = [
-    { value: 'USD', label: 'US Dollar', symbol: '$' },
-    { value: 'EUR', label: 'Euro', symbol: '€' },
-    { value: 'GBP', label: 'British Pound', symbol: '£' },
-    { value: 'IDR', label: 'Indonesian Rupiah', symbol: 'Rp' },
-    { value: 'JPY', label: 'Japanese Yen', symbol: '¥' },
-    { value: 'AUD', label: 'Australian Dollar', symbol: 'A$' },
-    { value: 'CAD', label: 'Canadian Dollar', symbol: 'C$' },
-    { value: 'SGD', label: 'Singapore Dollar', symbol: 'S$' },
-    { value: 'MYR', label: 'Malaysian Ringgit', symbol: 'RM' },
-    { value: 'PHP', label: 'Philippine Peso', symbol: '₱' },
+    { value: 'USD', label: 'US Dollar' },
+    { value: 'IDR', label: 'Indonesian Rupiah' },
+    { value: 'SGD', label: 'Singapore Dollar' },
 ];
 
 export const INTERVAL_OPTIONS: {

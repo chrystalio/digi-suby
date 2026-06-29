@@ -448,7 +448,7 @@ export function SubscriptionFormModal({
                                                 key={opt.value}
                                                 value={opt.value}
                                             >
-                                                {opt.symbol} {opt.value}
+                                                {opt.value}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
