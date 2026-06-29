@@ -108,8 +108,18 @@ class SubscriptionController extends Controller
     public function store(StoreSubscriptionRequest $request): RedirectResponse
     {
         try {
+            $validated = $request->validated();
+
+            // next_billing_date is derived from started_at + interval. Form no longer
+            // sends it; ??= leaves any sent value alone (override path) but fills in
+            // when the field isn't present or is null.
+            $validated['next_billing_date'] ??= Subscription::computeNextBillingDate(
+                $validated['started_at'],
+                $validated['interval'],
+            );
+
             Subscription::create([
-                ...$request->validated(),
+                ...$validated,
                 'user_id' => $request->user()->id,
             ]);
 
@@ -126,7 +136,17 @@ class SubscriptionController extends Controller
     public function update(UpdateSubscriptionRequest $request, Subscription $subscription): RedirectResponse
     {
         try {
-            $subscription->update($request->validated());
+            $validated = $request->validated();
+
+            // Always rederive on update so an interval change propagates to the
+            // next billing date. Fall back to the model's current values when
+            // the form didn't include them (defensive — current form always does).
+            $validated['next_billing_date'] = Subscription::computeNextBillingDate(
+                $validated['started_at'] ?? $subscription->started_at,
+                $validated['interval'] ?? $subscription->interval,
+            );
+
+            $subscription->update($validated);
 
             return redirect()
                 ->route('subscriptions.index')

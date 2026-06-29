@@ -8,6 +8,7 @@ use App\Enums\SubscriptionStatus;
 use App\Models\Category;
 use App\Models\PaymentMethod;
 use App\Models\Service;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -31,7 +32,10 @@ class SubscriptionFactory extends Factory
             'amount' => 9.99,
             'currency' => Currency::USD,
             'interval' => SubscriptionInterval::Monthly,
-            'next_billing_date' => now()->addDays(30)->toDateString(),
+            'next_billing_date' => Subscription::computeNextBillingDate(
+                now()->subMonth(),
+                SubscriptionInterval::Monthly,
+            ),
             'started_at' => now()->subMonth()->toDateString(),
             'trial_ends_at' => null,
             'cancelled_at' => null,

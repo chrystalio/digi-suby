@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Currency;
 use App\Enums\SubscriptionInterval;
 use App\Enums\SubscriptionStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -100,6 +101,30 @@ class Subscription extends Model
             SubscriptionInterval::Quarterly => (float) $this->amount / 3,
             SubscriptionInterval::Yearly => (float) $this->amount / 12,
             SubscriptionInterval::Lifetime => 0.0,
+        };
+    }
+
+    /**
+     * Compute the next billing date from a start date and an interval.
+     * Returns null for lifetime plans (no recurring billing).
+     *
+     * Single source of truth: the controller and factory both call this so
+     * the formula only lives in one place.
+     */
+    public static function computeNextBillingDate(
+        Carbon|string $startedAt,
+        SubscriptionInterval $interval,
+    ): ?Carbon {
+        $start = $startedAt instanceof Carbon
+            ? $startedAt->copy()
+            : Carbon::parse($startedAt);
+
+        return match ($interval) {
+            SubscriptionInterval::Weekly => $start->addWeek(),
+            SubscriptionInterval::Monthly => $start->addMonth(),
+            SubscriptionInterval::Quarterly => $start->addMonths(3),
+            SubscriptionInterval::Yearly => $start->addYear(),
+            SubscriptionInterval::Lifetime => null,
         };
     }
 
