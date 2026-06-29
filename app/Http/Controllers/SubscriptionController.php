@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSubscriptionRequest;
 use App\Http\Requests\UpdateSubscriptionRequest;
+use App\Models\PaymentMethod;
+use App\Models\Service;
 use App\Models\Subscription;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -65,8 +67,20 @@ class SubscriptionController extends Controller
                 'can_delete' => $user->can('delete', $subscription),
             ]);
 
+        $services = Service::query()
+            ->visibleTo($user)
+            ->orderBy('name')
+            ->get(['id', 'name', 'logo', 'is_system']);
+
+        $paymentMethods = PaymentMethod::query()
+            ->where('user_id', $user->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'method_type', 'card_last_four']);
+
         return Inertia::render('subscriptions/index', [
             'subscriptions' => $subscriptions,
+            'services' => $services,
+            'paymentMethods' => $paymentMethods,
             'filters' => [
                 'search' => $search,
                 'status' => $status,
