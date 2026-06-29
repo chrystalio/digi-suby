@@ -23,7 +23,6 @@ import { SubscriptionFormModal } from '@/pages/subscriptions/subscription-form-m
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { index as subscriptionsIndex } from '@/routes/subscriptions';
-import { cn } from '@/lib/utils';
 import {
     type BreadcrumbItem,
     type PaginatedData,
@@ -61,154 +60,251 @@ interface SubscriptionCardProps {
     onEdit: (subscription: Subscription) => void;
 }
 
+// Status palette — sophisticated, not loud. Used as solid colors so the
+// card body stays calm (cream paper) and the band pops as a single stripe.
+const STATUS_PALETTE: Record<
+    string,
+    { band: string; accent: string; label: string }
+> = {
+    active: { band: '#065F46', accent: '#10B981', label: 'Active' },
+    trial: { band: '#1E40AF', accent: '#3B82F6', label: 'Trial' },
+    cancelled: { band: '#9A3412', accent: '#EA580C', label: 'Cancelled' },
+};
+
+const DISPLAY_FONT =
+    "'Fraunces', ui-serif, Georgia, 'Times New Roman', serif";
+
+function StatusPill({
+    accent,
+    color,
+    children,
+}: {
+    accent: string;
+    color: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <span
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{ backgroundColor: `${accent}1f`, color }}
+        >
+            {children}
+        </span>
+    );
+}
+
+function ReceiptRow({
+    label,
+    children,
+}: {
+    label: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="flex items-center justify-between gap-3">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {label}
+            </span>
+            <span className="flex min-w-0 items-center gap-1.5 text-right text-xs font-medium text-foreground tabular-nums">
+                {children}
+            </span>
+        </div>
+    );
+}
+
 function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    const statusGradient = {
-        active: 'from-emerald-500 to-emerald-700',
-        trial: 'from-sky-500 to-sky-700',
-        cancelled: 'from-amber-600 to-amber-800',
-    }[subscription.status] ?? 'from-slate-500 to-slate-700';
+    const palette =
+        STATUS_PALETTE[subscription.status] ?? {
+            band: '#1E293B',
+            accent: '#64748B',
+            label: subscription.status,
+        };
+
+    const startedAt = subscription.started_at;
 
     return (
         <>
-            <div className="group relative overflow-hidden rounded-xl border bg-card text-card-foreground transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lg focus-within:ring-2 focus-within:ring-ring">
-                {/* Magazine-cover top — status gradient */}
+            <div
+                className="group relative flex flex-col overflow-hidden rounded-xl border border-border/60 shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-ring"
+                style={{
+                    background:
+                        'linear-gradient(180deg, #FAFAF7 0%, #F4F1EA 100%)',
+                }}
+            >
+                {/* Status spine — 6px colored stripe across the top */}
                 <div
-                    className={cn(
-                        'relative bg-gradient-to-b p-5 pb-6 text-center text-white',
-                        statusGradient,
-                    )}
+                    className="h-1.5 w-full"
+                    style={{ backgroundColor: palette.band }}
+                />
+
+                {/* Header band — service identity on dark */}
+                <div
+                    className="relative flex items-center justify-between gap-2 px-4 py-2.5 text-white"
+                    style={{ backgroundColor: palette.band }}
                 >
-                    {/* Action menu — top-right of the colored section */}
-                    {(subscription.can_edit || subscription.can_delete) && (
-                        <div className="absolute right-2 top-2 z-10">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button className="rounded-md p-1 text-white/70 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-white/15 hover:text-white">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-40">
-                                    {subscription.can_edit && (
-                                        <DropdownMenuItem
-                                            onClick={() => onEdit(subscription)}
-                                            className="flex cursor-pointer items-center"
-                                        >
-                                            <Pencil className="mr-2 h-4 w-4" />
-                                            Edit
-                                        </DropdownMenuItem>
-                                    )}
-                                    {subscription.can_delete && (
-                                        <>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                                onClick={() =>
-                                                    setIsDeleteDialogOpen(
-                                                        true,
-                                                    )
-                                                }
-                                                className="cursor-pointer text-destructive focus:text-destructive"
-                                            >
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </DropdownMenuItem>
-                                        </>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    )}
-
-                    {/* Status eyebrow label — small, uppercase, white */}
-                    <div className="flex items-center justify-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-90">
-                        <span className="h-1.5 w-1.5 rounded-full bg-white shadow-sm" />
-                        <span>{subscription.status}</span>
-                    </div>
-
-                    {/* Hero logo — big, centered */}
-                    <div className="mt-3 flex justify-center">
+                    <div className="flex min-w-0 items-center gap-2.5">
                         <ServiceLogo
                             src={subscription.service?.logo ?? null}
                             alt={
                                 subscription.service?.name ?? subscription.name
                             }
-                            size="xl"
+                            size="xs"
+                            className="ring-1 ring-white/25"
                         />
+                        <div className="min-w-0">
+                            <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/60">
+                                {palette.label}
+                            </p>
+                            <h3 className="truncate text-[13px] font-semibold leading-tight">
+                                {subscription.service?.name ??
+                                    subscription.name}
+                            </h3>
+                        </div>
                     </div>
 
-                    {/* Amount — hero number, white */}
-                    <div className="mt-3 flex items-baseline justify-center gap-1">
-                        <span className="text-2xl font-semibold">
+                    {(subscription.can_edit || subscription.can_delete) && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    aria-label="Subscription actions"
+                                    className="rounded-md p-1 text-white/60 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-white/10 hover:text-white"
+                                >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                                {subscription.can_edit && (
+                                    <DropdownMenuItem
+                                        onClick={() => onEdit(subscription)}
+                                        className="flex cursor-pointer items-center"
+                                    >
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                )}
+                                {subscription.can_delete && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                setIsDeleteDialogOpen(true)
+                                            }
+                                            className="cursor-pointer text-destructive focus:text-destructive"
+                                        >
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
+                </div>
+
+                {/* Hero — the amount, in display serif. Italic for character. */}
+                <div className="px-5 pb-3 pt-5">
+                    <div className="flex items-baseline gap-1.5">
+                        <span
+                            className="text-[44px] font-semibold leading-none tracking-tight tabular-nums"
+                            style={{
+                                fontFamily: DISPLAY_FONT,
+                                fontStyle: 'italic',
+                                color: palette.band,
+                            }}
+                        >
                             {subscription.display_amount}
                         </span>
-                        <span className="text-xs opacity-90">
+                        <span className="text-sm font-medium text-muted-foreground">
                             / {subscription.interval}
                         </span>
                     </div>
-
-                    {/* Urgency pills — white-on-color so they stand out */}
-                    {(subscription.is_trial_ending_soon ||
-                        subscription.is_renewing_soon) && (
-                        <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
-                            {subscription.is_trial_ending_soon && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-xs">
-                                    <CalendarClock className="h-3 w-3" />
-                                    trial ends soon
-                                </span>
-                            )}
-                            {subscription.is_renewing_soon && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-xs">
-                                    renewing soon
-                                </span>
-                            )}
-                        </div>
-                    )}
+                    {subscription.service &&
+                        subscription.name !== subscription.service.name && (
+                            <p className="mt-2 line-clamp-1 text-sm text-muted-foreground">
+                                {subscription.name}
+                            </p>
+                        )}
                 </div>
 
-                {/* Bottom white section — name + next-billing */}
-                <div className="p-5">
-                    <h4 className="line-clamp-2 text-center text-sm font-semibold">
-                        {subscription.name}
-                    </h4>
-                    {subscription.service && (
-                        <p className="mt-0.5 line-clamp-1 text-center text-xs text-muted-foreground">
-                            {subscription.service.name}
-                        </p>
-                    )}
+                {/* Hairline rule */}
+                <div
+                    className="mx-5 h-px"
+                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.08)' }}
+                />
 
-                    <div className="mt-3 text-xs text-muted-foreground">
+                {/* Receipt-style metadata rows */}
+                <div className="space-y-1.5 px-5 py-3">
+                    <ReceiptRow label="Renews">
                         {subscription.is_lifetime ? (
-                            <span className="block text-center">
-                                Lifetime — no recurring charge
+                            <span className="font-medium italic text-muted-foreground">
+                                Lifetime
                             </span>
                         ) : subscription.is_cancelled ? (
-                            <span className="block text-center">
+                            <span className="font-medium italic text-muted-foreground">
                                 Cancelled
-                                {subscription.cancelled_at &&
-                                    ` on ${subscription.cancelled_at}`}
                             </span>
                         ) : subscription.next_billing_date ? (
-                            <span className="block text-center">
-                                Next billing {subscription.next_billing_date}
+                            <>
+                                <span>{subscription.next_billing_date}</span>
                                 {subscription.days_until_next_billing !==
                                     null && (
-                                    <>
-                                        {' · '}
-                                        {subscription.days_until_next_billing <=
-                                        0
-                                            ? 'today'
-                                            : `in ${subscription.days_until_next_billing} day${subscription.days_until_next_billing === 1 ? '' : 's'}`}
-                                    </>
+                                    <span className="text-muted-foreground">
+                                        · in{' '}
+                                        {subscription.days_until_next_billing}
+                                        d
+                                    </span>
                                 )}
-                            </span>
+                            </>
                         ) : (
-                            <span className="block text-center">
-                                No upcoming billing
+                            <span className="text-muted-foreground">—</span>
+                        )}
+                    </ReceiptRow>
+
+                    {subscription.payment_method && (
+                        <ReceiptRow label="Payment">
+                            <span className="truncate">
+                                {subscription.payment_method.name}
                             </span>
+                            {subscription.payment_method.card_last_four && (
+                                <span className="text-muted-foreground tabular-nums">
+                                    •• {subscription.payment_method.card_last_four}
+                                </span>
+                            )}
+                        </ReceiptRow>
+                    )}
+
+                    {startedAt && !subscription.is_cancelled && (
+                        <ReceiptRow label="Since">
+                            <span className="tabular-nums">{startedAt}</span>
+                        </ReceiptRow>
+                    )}
+                </div>
+
+                {/* Urgency pills — bottom of card, only when relevant */}
+                {(subscription.is_trial_ending_soon ||
+                    subscription.is_renewing_soon) && (
+                    <div className="flex flex-wrap items-center gap-1.5 px-5 pb-4">
+                        {subscription.is_trial_ending_soon && (
+                            <StatusPill
+                                accent={palette.accent}
+                                color={palette.band}
+                            >
+                                <CalendarClock className="h-3 w-3" />
+                                Trial ends soon
+                            </StatusPill>
+                        )}
+                        {subscription.is_renewing_soon && (
+                            <StatusPill
+                                accent={palette.accent}
+                                color={palette.band}
+                            >
+                                Renewing soon
+                            </StatusPill>
                         )}
                     </div>
-                </div>
+                )}
             </div>
 
             {subscription.can_delete && (
@@ -371,7 +467,17 @@ export default function SubscriptionsIndex({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Subscriptions" />
+            <Head title="Subscriptions">
+                <link
+                    rel="preconnect"
+                    href="https://fonts.bunny.net"
+                    crossOrigin=""
+                />
+                <link
+                    rel="stylesheet"
+                    href="https://fonts.bunny.net/css?family=fraunces:400,600,700,400i,700i&display=swap"
+                />
+            </Head>
 
             <div className="mx-8 my-4">
                 <div className="mb-6">
