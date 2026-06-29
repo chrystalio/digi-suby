@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ServiceLogo } from '@/components/ui/service-logo';
 import {
     Select,
     SelectContent,
@@ -21,6 +22,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import {
     CURRENCY_OPTIONS,
     INTERVAL_OPTIONS,
@@ -33,7 +35,8 @@ import {
     type SubscriptionFormData,
 } from '@/types';
 import { useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { Check, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface SubscriptionFormModalProps {
     open: boolean;
@@ -84,6 +87,14 @@ export function SubscriptionFormModal({
 
     const { data, setData, post, put, processing, errors, reset } =
         useForm<SubscriptionFormData>(blankForm());
+
+    const [serviceOpen, setServiceOpen] = useState(false);
+    const [paymentMethodOpen, setPaymentMethodOpen] = useState(false);
+
+    const selectedService =
+        services.find((s) => s.id === data.service_id) ?? null;
+    const selectedPaymentMethod =
+        paymentMethods.find((pm) => pm.id === data.payment_method_id) ?? null;
 
     useEffect(() => {
         if (open) {
@@ -169,27 +180,91 @@ export function SubscriptionFormModal({
 
                         <div className="grid gap-2">
                             <Label htmlFor="service_id">Service</Label>
-                            <Select
-                                value={data.service_id || undefined}
-                                onValueChange={(value) =>
-                                    setData('service_id', value)
-                                }
-                            >
-                                <SelectTrigger id="service_id">
-                                    <SelectValue placeholder="Select a service" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {services.map((service) => (
-                                        <SelectItem
-                                            key={service.id}
-                                            value={service.id}
-                                        >
-                                            {service.name}
-                                            {service.is_system ? ' (System)' : ''}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    id="service_id"
+                                    onClick={() => setServiceOpen(!serviceOpen)}
+                                    className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                >
+                                    <span className="flex min-w-0 items-center gap-2">
+                                        {selectedService ? (
+                                            <>
+                                                <ServiceLogo
+                                                    src={selectedService.logo}
+                                                    alt={selectedService.name}
+                                                    size="sm"
+                                                />
+                                                <span className="truncate">
+                                                    {selectedService.name}
+                                                    {selectedService.is_system
+                                                        ? ' (System)'
+                                                        : ''}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="text-muted-foreground">
+                                                Select a service
+                                            </span>
+                                        )}
+                                    </span>
+                                    <ChevronDown
+                                        className={cn(
+                                            'h-4 w-4 flex-shrink-0 opacity-50 transition-transform',
+                                            serviceOpen && 'rotate-180',
+                                        )}
+                                    />
+                                </button>
+                                {serviceOpen && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() => setServiceOpen(false)}
+                                        />
+                                        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
+                                            <div className="max-h-48 overflow-y-auto p-1">
+                                                {services.map((service) => (
+                                                    <button
+                                                        key={service.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setData(
+                                                                'service_id',
+                                                                service.id,
+                                                            );
+                                                            setServiceOpen(
+                                                                false,
+                                                            );
+                                                        }}
+                                                        className={cn(
+                                                            'relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
+                                                            data.service_id ===
+                                                                service.id &&
+                                                                'bg-accent text-accent-foreground',
+                                                        )}
+                                                    >
+                                                        <ServiceLogo
+                                                            src={service.logo}
+                                                            alt={service.name}
+                                                            size="sm"
+                                                        />
+                                                        <span className="truncate">
+                                                            {service.name}
+                                                            {service.is_system
+                                                                ? ' (System)'
+                                                                : ''}
+                                                        </span>
+                                                        {data.service_id ===
+                                                            service.id && (
+                                                            <Check className="ml-auto h-4 w-4" />
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                             {errors.service_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.service_id}
@@ -204,32 +279,127 @@ export function SubscriptionFormModal({
                                     (optional)
                                 </span>
                             </Label>
-                            <Select
-                                value={data.payment_method_id || 'none'}
-                                onValueChange={(value) =>
-                                    setData(
-                                        'payment_method_id',
-                                        value === 'none' ? '' : value,
-                                    )
-                                }
-                            >
-                                <SelectTrigger id="payment_method_id">
-                                    <SelectValue placeholder="None" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">
-                                        None
-                                    </SelectItem>
-                                    {paymentMethods.map((pm) => (
-                                        <SelectItem key={pm.id} value={pm.id}>
-                                            {pm.name}
-                                            {pm.card_last_four
-                                                ? ` •••• ${pm.card_last_four}`
-                                                : ''}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    id="payment_method_id"
+                                    onClick={() =>
+                                        setPaymentMethodOpen(!paymentMethodOpen)
+                                    }
+                                    className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                >
+                                    <span className="flex min-w-0 items-center gap-2">
+                                        {selectedPaymentMethod ? (
+                                            <>
+                                                <ServiceLogo
+                                                    src={
+                                                        selectedPaymentMethod.logo_url
+                                                    }
+                                                    alt={
+                                                        selectedPaymentMethod.name
+                                                    }
+                                                    size="sm"
+                                                />
+                                                <span className="truncate">
+                                                    {
+                                                        selectedPaymentMethod.name
+                                                    }
+                                                    {selectedPaymentMethod.card_last_four
+                                                        ? ` •••• ${selectedPaymentMethod.card_last_four}`
+                                                        : ''}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="text-muted-foreground">
+                                                None
+                                            </span>
+                                        )}
+                                    </span>
+                                    <ChevronDown
+                                        className={cn(
+                                            'h-4 w-4 flex-shrink-0 opacity-50 transition-transform',
+                                            paymentMethodOpen && 'rotate-180',
+                                        )}
+                                    />
+                                </button>
+                                {paymentMethodOpen && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() =>
+                                                setPaymentMethodOpen(false)
+                                            }
+                                        />
+                                        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
+                                            <div className="max-h-48 overflow-y-auto p-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setData(
+                                                            'payment_method_id',
+                                                            '',
+                                                        );
+                                                        setPaymentMethodOpen(
+                                                            false,
+                                                        );
+                                                    }}
+                                                    className={cn(
+                                                        'relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
+                                                        data.payment_method_id ===
+                                                            '' &&
+                                                            'bg-accent text-accent-foreground',
+                                                    )}
+                                                >
+                                                    <span className="text-muted-foreground">
+                                                        None
+                                                    </span>
+                                                    {data.payment_method_id ===
+                                                        '' && (
+                                                        <Check className="ml-auto h-4 w-4" />
+                                                    )}
+                                                </button>
+                                                {paymentMethods.map((pm) => (
+                                                    <button
+                                                        key={pm.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setData(
+                                                                'payment_method_id',
+                                                                pm.id,
+                                                            );
+                                                            setPaymentMethodOpen(
+                                                                false,
+                                                            );
+                                                        }}
+                                                        className={cn(
+                                                            'relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
+                                                            data.payment_method_id ===
+                                                                pm.id &&
+                                                                'bg-accent text-accent-foreground',
+                                                        )}
+                                                    >
+                                                        <ServiceLogo
+                                                            src={pm.logo_url}
+                                                            alt={pm.name}
+                                                            size="sm"
+                                                        />
+                                                        <span className="truncate">
+                                                            {pm.name}
+                                                            {pm.card_last_four
+                                                                ? ` •••• ${pm.card_last_four}`
+                                                                : ''}
+                                                        </span>
+                                                        {data.payment_method_id ===
+                                                            pm.id && (
+                                                            <Check className="ml-auto h-4 w-4" />
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                             {errors.payment_method_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.payment_method_id}
