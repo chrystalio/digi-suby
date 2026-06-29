@@ -4,11 +4,12 @@ import { Box } from 'lucide-react';
 interface Props {
     src: string | null;
     alt: string;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'xs' | 'sm' | 'md' | 'lg';
     className?: string;
 }
 
 const sizeClasses = {
+    xs: 'h-7 w-7',
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
     lg: 'h-12 w-12',

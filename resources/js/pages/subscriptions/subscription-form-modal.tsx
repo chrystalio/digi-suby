@@ -193,7 +193,7 @@ export function SubscriptionFormModal({
                                                 <ServiceLogo
                                                     src={selectedService.logo}
                                                     alt={selectedService.name}
-                                                    size="sm"
+                                                    size="xs"
                                                 />
                                                 <span className="truncate">
                                                     {selectedService.name}
@@ -246,7 +246,7 @@ export function SubscriptionFormModal({
                                                         <ServiceLogo
                                                             src={service.logo}
                                                             alt={service.name}
-                                                            size="sm"
+                                                            size="xs"
                                                         />
                                                         <span className="truncate">
                                                             {service.name}
@@ -298,7 +298,7 @@ export function SubscriptionFormModal({
                                                     alt={
                                                         selectedPaymentMethod.name
                                                     }
-                                                    size="sm"
+                                                    size="xs"
                                                 />
                                                 <span className="truncate">
                                                     {
@@ -381,7 +381,7 @@ export function SubscriptionFormModal({
                                                         <ServiceLogo
                                                             src={pm.logo_url}
                                                             alt={pm.name}
-                                                            size="sm"
+                                                            size="xs"
                                                         />
                                                         <span className="truncate">
                                                             {pm.name}
