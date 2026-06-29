@@ -60,54 +60,50 @@ interface SubscriptionCardProps {
     onEdit: (subscription: Subscription) => void;
 }
 
-// Status palette — sophisticated, not loud. Used as solid colors so the
-// card body stays calm (cream paper) and the band pops as a single stripe.
+// Status palette — bold dark colors for the wallet-pass header band
 const STATUS_PALETTE: Record<
     string,
-    { band: string; accent: string; label: string }
+    { band: string; label: string }
 > = {
-    active: { band: '#065F46', accent: '#10B981', label: 'Active' },
-    trial: { band: '#1E40AF', accent: '#3B82F6', label: 'Trial' },
-    cancelled: { band: '#9A3412', accent: '#EA580C', label: 'Cancelled' },
+    active: { band: '#065F46', label: 'Active' },
+    trial: { band: '#1E40AF', label: 'Trial' },
+    cancelled: { band: '#9A3412', label: 'Cancelled' },
 };
 
-const DISPLAY_FONT =
-    "'Fraunces', ui-serif, Georgia, 'Times New Roman', serif";
+// Stable per-subscription barcode — deterministic from the ID so the same
+// subscription always renders the same bars. Not a real Code128; a visual
+// signature element only.
+function Barcode({ seed }: { seed: string }) {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+        hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+    }
 
-function StatusPill({
-    accent,
-    color,
-    children,
-}: {
-    accent: string;
-    color: string;
-    children: React.ReactNode;
-}) {
+    const bars = Array.from({ length: 56 }, (_, i) => {
+        const v = Math.abs(hash + i * 7919) % 10;
+        return {
+            width: v < 4 ? 1 : v < 7 ? 2 : 3,
+            gap: v === 9 ? 2 : v === 7 ? 1 : 0,
+            tall: v % 3 === 0,
+        };
+    });
+
     return (
-        <span
-            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
-            style={{ backgroundColor: `${accent}1f`, color }}
+        <div
+            className="flex h-10 select-none items-end justify-between"
+            aria-hidden="true"
         >
-            {children}
-        </span>
-    );
-}
-
-function ReceiptRow({
-    label,
-    children,
-}: {
-    label: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="flex items-center justify-between gap-3">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {label}
-            </span>
-            <span className="flex min-w-0 items-center gap-1.5 text-right text-xs font-medium text-foreground tabular-nums">
-                {children}
-            </span>
+            {bars.map((b, i) => (
+                <div
+                    key={i}
+                    className="bg-slate-900"
+                    style={{
+                        width: `${b.width}px`,
+                        height: b.tall ? '100%' : '70%',
+                        marginRight: `${b.gap}px`,
+                    }}
+                />
+            ))}
         </div>
     );
 }
@@ -118,30 +114,20 @@ function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
     const palette =
         STATUS_PALETTE[subscription.status] ?? {
             band: '#1E293B',
-            accent: '#64748B',
             label: subscription.status,
         };
 
-    const startedAt = subscription.started_at;
+    // Short human-readable reference code for under the barcode.
+    // Last 8 chars of ULID uppercase + status initial.
+    const referenceCode =
+        `${subscription.id.slice(-8).toUpperCase()}-${subscription.status.charAt(0).toUpperCase()}`;
 
     return (
         <>
-            <div
-                className="group relative flex flex-col overflow-hidden rounded-xl border border-border/60 shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-ring"
-                style={{
-                    background:
-                        'linear-gradient(180deg, #FAFAF7 0%, #F4F1EA 100%)',
-                }}
-            >
-                {/* Status spine — 6px colored stripe across the top */}
+            <div className="group relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-md transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-2xl focus-within:ring-2 focus-within:ring-ring dark:bg-card">
+                {/* Dark header band — service identity */}
                 <div
-                    className="h-1.5 w-full"
-                    style={{ backgroundColor: palette.band }}
-                />
-
-                {/* Header band — service identity on dark */}
-                <div
-                    className="relative flex items-center justify-between gap-2 px-4 py-2.5 text-white"
+                    className="relative flex items-center justify-between gap-3 px-4 py-3 text-white"
                     style={{ backgroundColor: palette.band }}
                 >
                     <div className="flex min-w-0 items-center gap-2.5">
@@ -153,15 +139,23 @@ function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
                             size="xs"
                             className="ring-1 ring-white/25"
                         />
-                        <div className="min-w-0">
-                            <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/60">
-                                {palette.label}
-                            </p>
-                            <h3 className="truncate text-[13px] font-semibold leading-tight">
-                                {subscription.service?.name ??
-                                    subscription.name}
-                            </h3>
-                        </div>
+                        <h3 className="truncate text-[13px] font-semibold tracking-wide">
+                            {subscription.service?.name?.toUpperCase() ??
+                                subscription.name.toUpperCase()}
+                        </h3>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                        <span className="relative flex h-2 w-2">
+                            <span
+                                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+                                style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}
+                            />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+                        </span>
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
+                            {palette.label}
+                        </span>
                     </div>
 
                     {(subscription.can_edit || subscription.can_delete) && (
@@ -169,7 +163,7 @@ function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
                             <DropdownMenuTrigger asChild>
                                 <button
                                     aria-label="Subscription actions"
-                                    className="rounded-md p-1 text-white/60 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-white/10 hover:text-white"
+                                    className="absolute right-2 top-2 rounded-md p-1 text-white/60 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-white/10 hover:text-white"
                                 >
                                     <MoreHorizontal className="h-4 w-4" />
                                 </button>
@@ -203,105 +197,108 @@ function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
                     )}
                 </div>
 
-                {/* Hero — the amount, in display serif. Italic for character. */}
-                <div className="px-5 pb-3 pt-5">
-                    <div className="flex items-baseline gap-1.5">
-                        <span
-                            className="text-[44px] font-semibold leading-none tracking-tight tabular-nums"
-                            style={{
-                                fontFamily: DISPLAY_FONT,
-                                fontStyle: 'italic',
-                                color: palette.band,
-                            }}
-                        >
+                {/* Hero — the amount, bold sans, black-on-white */}
+                <div className="px-5 pb-4 pt-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                        Premium Plan
+                    </p>
+                    <div className="mt-2 flex items-baseline gap-3">
+                        <span className="text-[40px] font-bold leading-none tracking-tight text-slate-900 tabular-nums dark:text-foreground">
                             {subscription.display_amount}
                         </span>
-                        <span className="text-sm font-medium text-muted-foreground">
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                             / {subscription.interval}
                         </span>
                     </div>
-                    {subscription.service &&
-                        subscription.name !== subscription.service.name && (
-                            <p className="mt-2 line-clamp-1 text-sm text-muted-foreground">
-                                {subscription.name}
-                            </p>
-                        )}
                 </div>
 
-                {/* Hairline rule */}
-                <div
-                    className="mx-5 h-px"
-                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.08)' }}
-                />
+                {/* Solid hairline divider */}
+                <div className="mx-5 h-px bg-slate-200 dark:bg-border" />
 
-                {/* Receipt-style metadata rows */}
-                <div className="space-y-1.5 px-5 py-3">
-                    <ReceiptRow label="Renews">
+                {/* Two-column metadata grid */}
+                <div className="grid grid-cols-2 gap-4 px-5 py-4">
+                    <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                            Next Bill
+                        </p>
                         {subscription.is_lifetime ? (
-                            <span className="font-medium italic text-muted-foreground">
+                            <p className="mt-1 text-sm font-semibold text-foreground">
                                 Lifetime
-                            </span>
+                            </p>
                         ) : subscription.is_cancelled ? (
-                            <span className="font-medium italic text-muted-foreground">
+                            <p className="mt-1 text-sm font-semibold text-foreground">
                                 Cancelled
-                            </span>
+                            </p>
                         ) : subscription.next_billing_date ? (
                             <>
-                                <span>{subscription.next_billing_date}</span>
+                                <p className="mt-1 text-sm font-semibold tabular-nums text-foreground">
+                                    {subscription.next_billing_date}
+                                </p>
                                 {subscription.days_until_next_billing !==
                                     null && (
-                                    <span className="text-muted-foreground">
-                                        · in{' '}
-                                        {subscription.days_until_next_billing}
-                                        d
-                                    </span>
+                                    <p className="mt-0.5 text-[11px] tabular-nums text-muted-foreground">
+                                        {subscription.days_until_next_billing <=
+                                        0
+                                            ? 'bills today'
+                                            : `in ${subscription.days_until_next_billing} day${subscription.days_until_next_billing === 1 ? '' : 's'}`}
+                                    </p>
                                 )}
                             </>
                         ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <p className="mt-1 text-sm font-semibold text-muted-foreground">
+                                —
+                            </p>
                         )}
-                    </ReceiptRow>
+                    </div>
 
-                    {subscription.payment_method && (
-                        <ReceiptRow label="Payment">
-                            <span className="truncate">
-                                {subscription.payment_method.name}
-                            </span>
-                            {subscription.payment_method.card_last_four && (
-                                <span className="text-muted-foreground tabular-nums">
-                                    •• {subscription.payment_method.card_last_four}
-                                </span>
-                            )}
-                        </ReceiptRow>
-                    )}
-
-                    {startedAt && !subscription.is_cancelled && (
-                        <ReceiptRow label="Since">
-                            <span className="tabular-nums">{startedAt}</span>
-                        </ReceiptRow>
-                    )}
+                    <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                            Payment
+                        </p>
+                        {subscription.payment_method ? (
+                            <>
+                                <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                                    {subscription.payment_method.name}
+                                </p>
+                                {subscription.payment_method.card_last_four && (
+                                    <p className="mt-0.5 text-[11px] tabular-nums text-muted-foreground">
+                                        •• {subscription.payment_method.card_last_four}
+                                    </p>
+                                )}
+                            </>
+                        ) : (
+                            <p className="mt-1 text-sm font-semibold text-muted-foreground">
+                                —
+                            </p>
+                        )}
+                    </div>
                 </div>
 
-                {/* Urgency pills — bottom of card, only when relevant */}
+                {/* Perforated divider — dashed line before barcode */}
+                <div className="mx-5 border-t border-dashed border-slate-300 dark:border-border" />
+
+                {/* Barcode + reference code */}
+                <div className="px-5 pb-5 pt-3">
+                    <Barcode seed={subscription.id} />
+                    <p className="mt-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.2em] tabular-nums text-muted-foreground">
+                        {referenceCode}
+                    </p>
+                </div>
+
+                {/* Urgency pills overlay — only when relevant */}
                 {(subscription.is_trial_ending_soon ||
                     subscription.is_renewing_soon) && (
-                    <div className="flex flex-wrap items-center gap-1.5 px-5 pb-4">
+                    <div className="absolute right-3 top-[64px] flex flex-col gap-1">
                         {subscription.is_trial_ending_soon && (
-                            <StatusPill
-                                accent={palette.accent}
-                                color={palette.band}
-                            >
-                                <CalendarClock className="h-3 w-3" />
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-md">
+                                <CalendarClock className="h-2.5 w-2.5" />
                                 Trial ends soon
-                            </StatusPill>
+                            </span>
                         )}
                         {subscription.is_renewing_soon && (
-                            <StatusPill
-                                accent={palette.accent}
-                                color={palette.band}
-                            >
+                            <span className="inline-flex items-center gap-1 rounded-full bg-sky-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-md">
                                 Renewing soon
-                            </StatusPill>
+                            </span>
                         )}
                     </div>
                 )}
@@ -467,17 +464,7 @@ export default function SubscriptionsIndex({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Subscriptions">
-                <link
-                    rel="preconnect"
-                    href="https://fonts.bunny.net"
-                    crossOrigin=""
-                />
-                <link
-                    rel="stylesheet"
-                    href="https://fonts.bunny.net/css?family=fraunces:400,600,700,400i,700i&display=swap"
-                />
-            </Head>
+            <Head title="Subscriptions" />
 
             <div className="mx-8 my-4">
                 <div className="mb-6">
