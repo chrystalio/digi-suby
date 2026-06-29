@@ -24,8 +24,11 @@ class SubscriptionController extends Controller
         $subscriptions = Subscription::query()
             ->where('user_id', $user->id)
             ->with([
-                'service:id,name,slug,logo',
-                'paymentMethod:id,name,card_last_four,e_wallet_provider,logo_url',
+                // `logo` and `logo_url` are $appends accessors, not DB columns — keep
+                // only the real columns here so the eager-load SQL is valid. `url` is
+                // needed by Service::getLogoAttribute() (which runs in PHP, not SQL).
+                'service:id,name,slug,url',
+                'paymentMethod:id,name,method_type,card_type,card_last_four,e_wallet_provider',
             ])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($currency !== '', fn ($query) => $query->where('currency', $currency))
@@ -70,12 +73,12 @@ class SubscriptionController extends Controller
         $services = Service::query()
             ->visibleTo($user)
             ->orderBy('name')
-            ->get(['id', 'name', 'logo', 'is_system']);
+            ->get(['id', 'name', 'is_system']);
 
         $paymentMethods = PaymentMethod::query()
             ->where('user_id', $user->id)
             ->orderBy('name')
-            ->get(['id', 'name', 'method_type', 'card_last_four']);
+            ->get(['id', 'name', 'method_type', 'card_last_four', 'card_type', 'e_wallet_provider']);
 
         return Inertia::render('subscriptions/index', [
             'subscriptions' => $subscriptions,
