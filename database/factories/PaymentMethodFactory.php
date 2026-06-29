@@ -29,7 +29,12 @@ class PaymentMethodFactory extends Factory
             'card_category' => CardCategory::Credit,
             'card_last_four' => fake()->numerify('####'),
             'card_expiry_month' => fake()->numberBetween(1, 12),
-            'card_expiry_year' => fake()->numberBetween(date('Y'), date('Y') + 10),
+            // Bump minimum to next year so default-state cards are guaranteed valid
+            // regardless of the randomly chosen month — otherwise ~4% of cards land
+            // on (current year, past month) once we pass mid-year, and UpdatePaymentMethodRequest
+            // rejects them in withValidator(). The `expired()` state is the explicit
+            // path for testing expired-card behavior.
+            'card_expiry_year' => fake()->numberBetween(date('Y') + 1, date('Y') + 10),
             'e_wallet_provider' => null,
             'e_wallet_identifier' => null,
             'is_default' => false,
@@ -47,7 +52,7 @@ class PaymentMethodFactory extends Factory
             'card_category' => $category ?? CardCategory::Credit,
             'card_last_four' => fake()->numerify('####'),
             'card_expiry_month' => fake()->numberBetween(1, 12),
-            'card_expiry_year' => fake()->numberBetween(date('Y'), date('Y') + 10),
+            'card_expiry_year' => fake()->numberBetween(date('Y') + 1, date('Y') + 10),
             'e_wallet_provider' => null,
             'e_wallet_identifier' => null,
         ]);
