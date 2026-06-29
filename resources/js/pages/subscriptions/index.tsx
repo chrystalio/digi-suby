@@ -24,6 +24,7 @@ import { SubscriptionFormModal } from '@/pages/subscriptions/subscription-form-m
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { index as subscriptionsIndex } from '@/routes/subscriptions';
+import { cn } from '@/lib/utils';
 import {
     type BreadcrumbItem,
     type PaginatedData,
@@ -72,112 +73,136 @@ interface SubscriptionCardProps {
 function SubscriptionCard({ subscription, onEdit }: SubscriptionCardProps) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+    const statusColor = {
+        active: 'bg-emerald-500',
+        trial: 'bg-sky-500',
+        cancelled: 'bg-amber-500',
+    }[subscription.status] ?? 'bg-slate-400';
+
     return (
         <>
-            <div className="group relative rounded-xl border bg-card p-4 transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
-                <div className="flex items-start gap-3">
+            <div className="group relative overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
+                {/* Status-driven color stripe along the top edge */}
+                <div className={cn('h-1', statusColor)} aria-hidden="true" />
+
+                <div className="flex flex-col items-center p-5">
+                    {/* Action menu — top-right corner overlaying the card */}
+                    {(subscription.can_edit || subscription.can_delete) && (
+                        <div className="absolute right-2 top-3">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-accent">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40">
+                                    {subscription.can_edit && (
+                                        <DropdownMenuItem
+                                            onClick={() => onEdit(subscription)}
+                                            className="flex cursor-pointer items-center"
+                                        >
+                                            <Pencil className="mr-2 h-4 w-4" />
+                                            Edit
+                                        </DropdownMenuItem>
+                                    )}
+                                    {subscription.can_delete && (
+                                        <>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                                onClick={() =>
+                                                    setIsDeleteDialogOpen(
+                                                        true,
+                                                    )
+                                                }
+                                                className="cursor-pointer text-destructive focus:text-destructive"
+                                            >
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Delete
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    )}
+
+                    {/* Hero logo — big, centered */}
                     <ServiceLogo
                         src={subscription.service?.logo ?? null}
                         alt={subscription.service?.name ?? subscription.name}
-                        size="sm"
+                        size="xl"
                     />
 
-                    <div className="min-w-0 flex-1">
-                        <h4 className="truncate text-sm font-medium">
-                            {subscription.name}
-                        </h4>
-                        {subscription.service && (
-                            <p className="truncate text-xs text-muted-foreground">
-                                {subscription.service.name}
-                            </p>
-                        )}
+                    {/* Name (2 lines max) */}
+                    <h4 className="mt-3 line-clamp-2 text-center text-sm font-semibold">
+                        {subscription.name}
+                    </h4>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                            <Badge variant={statusVariant(subscription.status)}>
-                                {subscription.status}
+                    {/* Service subtitle */}
+                    {subscription.service && (
+                        <p className="mt-0.5 line-clamp-1 text-center text-xs text-muted-foreground">
+                            {subscription.service.name}
+                        </p>
+                    )}
+
+                    {/* Status badges row — color-coded by status */}
+                    <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+                        <Badge variant={statusVariant(subscription.status)}>
+                            {subscription.status}
+                        </Badge>
+                        {subscription.is_trial_ending_soon && (
+                            <Badge variant="secondary">
+                                <CalendarClock className="mr-1 h-3 w-3" />
+                                trial ends soon
                             </Badge>
-                            {subscription.is_trial_ending_soon && (
-                                <Badge variant="secondary">
-                                    <CalendarClock className="mr-1 h-3 w-3" />
-                                    trial ends soon
-                                </Badge>
-                            )}
-                            {subscription.is_renewing_soon && (
-                                <Badge>renewing soon</Badge>
-                            )}
-                        </div>
+                        )}
+                        {subscription.is_renewing_soon && (
+                            <Badge>renewing soon</Badge>
+                        )}
                     </div>
 
-                    {(subscription.can_edit || subscription.can_delete) && (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button className="flex-shrink-0 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-accent">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40">
-                                {subscription.can_edit && (
-                                    <DropdownMenuItem
-                                        onClick={() => onEdit(subscription)}
-                                        className="flex cursor-pointer items-center"
-                                    >
-                                        <Pencil className="mr-2 h-4 w-4" />
-                                        Edit
-                                    </DropdownMenuItem>
-                                )}
-                                {subscription.can_delete && (
+                    {/* Amount + interval — hero number */}
+                    <div className="mt-4 flex items-baseline gap-1">
+                        <span className="text-2xl font-semibold">
+                            {subscription.display_amount}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                            / {subscription.interval}
+                        </span>
+                    </div>
+
+                    {/* Next billing — separated by border-top */}
+                    <div className="mt-4 w-full border-t pt-3 text-xs text-muted-foreground">
+                        {subscription.is_lifetime ? (
+                            <span className="block text-center">
+                                Lifetime — no recurring charge
+                            </span>
+                        ) : subscription.is_cancelled ? (
+                            <span className="block text-center">
+                                Cancelled
+                                {subscription.cancelled_at &&
+                                    ` on ${subscription.cancelled_at}`}
+                            </span>
+                        ) : subscription.next_billing_date ? (
+                            <span className="block text-center">
+                                Next billing {subscription.next_billing_date}
+                                {subscription.days_until_next_billing !==
+                                    null && (
                                     <>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                            onClick={() =>
-                                                setIsDeleteDialogOpen(true)
-                                            }
-                                            className="cursor-pointer text-destructive focus:text-destructive"
-                                        >
-                                            <Trash2 className="mr-2 h-4 w-4" />
-                                            Delete
-                                        </DropdownMenuItem>
+                                        {' · '}
+                                        {subscription.days_until_next_billing <=
+                                        0
+                                            ? 'today'
+                                            : `in ${subscription.days_until_next_billing} day${subscription.days_until_next_billing === 1 ? '' : 's'}`}
                                     </>
                                 )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
-                </div>
-
-                <div className="mt-3 flex items-end justify-between">
-                    <span className="text-lg font-semibold">
-                        {subscription.display_amount}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                        / {subscription.interval}
-                    </span>
-                </div>
-
-                <div className="mt-2 text-xs text-muted-foreground">
-                    {subscription.is_lifetime ? (
-                        <span>Lifetime — no recurring charge</span>
-                    ) : subscription.is_cancelled ? (
-                        <span>
-                            Cancelled
-                            {subscription.cancelled_at &&
-                                ` on ${subscription.cancelled_at}`}
-                        </span>
-                    ) : subscription.next_billing_date ? (
-                        <span>
-                            Next billing {subscription.next_billing_date}
-                            {subscription.days_until_next_billing !== null && (
-                                <>
-                                    {' '}
-                                    ·{' '}
-                                    {subscription.days_until_next_billing <= 0
-                                        ? 'today'
-                                        : `in ${subscription.days_until_next_billing} day${subscription.days_until_next_billing === 1 ? '' : 's'}`}
-                                </>
-                            )}
-                        </span>
-                    ) : (
-                        <span>No upcoming billing</span>
-                    )}
+                            </span>
+                        ) : (
+                            <span className="block text-center">
+                                No upcoming billing
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -502,7 +527,7 @@ export default function SubscriptionsIndex({
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {subscriptions.data.map((subscription) => (
                                 <SubscriptionCard
                                     key={subscription.id}
