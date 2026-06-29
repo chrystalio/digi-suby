@@ -56,7 +56,6 @@ const blankForm = (): SubscriptionFormData => ({
     currency: 'USD',
     interval: 'monthly',
     status: 'active',
-    next_billing_date: '',
     started_at: todayIso(),
     trial_ends_at: '',
     notes: '',
@@ -70,7 +69,6 @@ const fromSubscription = (s: Subscription): SubscriptionFormData => ({
     currency: s.currency,
     interval: s.interval,
     status: s.status,
-    next_billing_date: s.next_billing_date ?? '',
     started_at: s.started_at ?? todayIso(),
     trial_ends_at: s.trial_ends_at ?? '',
     notes: s.notes ?? '',
@@ -105,14 +103,6 @@ export function SubscriptionFormModal({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, subscription?.id]);
 
-    // Lifetime plans have no recurring billing date — clear it on interval change.
-    useEffect(() => {
-        if (data.interval === 'lifetime' && data.next_billing_date !== '') {
-            setData('next_billing_date', '');
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data.interval]);
-
     // Trial end date only makes sense while status is 'trial'.
     useEffect(() => {
         if (data.status !== 'trial' && data.trial_ends_at !== null) {
@@ -128,7 +118,6 @@ export function SubscriptionFormModal({
             ...data,
             payment_method_id: data.payment_method_id || null,
             trial_ends_at: data.trial_ends_at || null,
-            next_billing_date: data.next_billing_date || null,
         };
 
         if (isEditing && subscription) {
@@ -144,7 +133,6 @@ export function SubscriptionFormModal({
         }
     };
 
-    const isLifetime = data.interval === 'lifetime';
     const isTrial = data.status === 'trial';
 
     return (
@@ -512,51 +500,21 @@ export function SubscriptionFormModal({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="started_at">Started At</Label>
-                                <Input
-                                    id="started_at"
-                                    type="date"
-                                    value={data.started_at}
-                                    onChange={(e) =>
-                                        setData('started_at', e.target.value)
-                                    }
-                                />
-                                {errors.started_at && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.started_at}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="next_billing_date">
-                                    Next Billing Date
-                                </Label>
-                                <Input
-                                    id="next_billing_date"
-                                    type="date"
-                                    value={data.next_billing_date ?? ''}
-                                    disabled={isLifetime}
-                                    onChange={(e) =>
-                                        setData(
-                                            'next_billing_date',
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                                {isLifetime && (
-                                    <p className="text-xs text-muted-foreground">
-                                        Lifetime plans do not recur.
-                                    </p>
-                                )}
-                                {errors.next_billing_date && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.next_billing_date}
-                                    </p>
-                                )}
-                            </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="started_at">Started At</Label>
+                            <Input
+                                id="started_at"
+                                type="date"
+                                value={data.started_at}
+                                onChange={(e) =>
+                                    setData('started_at', e.target.value)
+                                }
+                            />
+                            {errors.started_at && (
+                                <p className="text-sm text-destructive">
+                                    {errors.started_at}
+                                </p>
+                            )}
                         </div>
 
                         {isTrial && (

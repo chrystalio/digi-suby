@@ -170,7 +170,6 @@ export interface SubscriptionFormData {
     currency: Currency;
     interval: SubscriptionInterval;
     status: SubscriptionStatus;
-    next_billing_date: string;
     started_at: string;
     trial_ends_at: string | null;
     notes: string;
